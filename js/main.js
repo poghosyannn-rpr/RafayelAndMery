@@ -3,17 +3,18 @@
    ========================================================================== */
 
 /* ----- CONFIG (edit these) ------------------------------------------------- */
-const EMAILJS_PUBLIC_KEY  = 'V4AcmfvgmYrV6Vp-i';
-const EMAILJS_SERVICE_ID  = 'service_9b1onqa';
-const EMAILJS_TEMPLATE_ID = 'template_au42no4';
-const MY_EMAIL            = 'poghosyan.nn@gmail.com';
+/* Wedding date/time — 25 Sep 2026, 14:00 (used by the countdown + calendar) */
+const WEDDING_DATE  = new Date('2026-09-25T14:00:00');
+const WEDDING_YEAR  = 2026;
+const WEDDING_MONTH = 8;   // 0-based: 8 = September
+const WEDDING_DAY   = 25;
 
-/* Wedding date/time — 26 Nov 2026, 14:00 (used by the countdown) */
-const WEDDING_DATE = new Date('2026-11-26T14:00:00');
+/* Map links for the two "How to get there" buttons */
+const MAP_CEREMONY  = 'https://yandex.com/maps/-/CTviUFLt';  // Kecharis
+const MAP_RECEPTION = 'https://yandex.com/maps/-/CTviYLpn';  // Palais Wedding Hall
 
-/* Google-Maps links for the two "How to get there" buttons (edit) */
-const MAP_CEREMONY  = 'https://maps.google.com/?q=';
-const MAP_RECEPTION = 'https://maps.google.com/?q=';
+/* Max guests selectable in the RSVP stepper */
+const MAX_PERSONS = 10;
 
 /* ----- small helpers ------------------------------------------------------- */
 const $  = (s, r = document) => r.querySelector(s);
@@ -66,7 +67,7 @@ function buildCalendar(dict) {
     grid.appendChild(h);
   }
 
-  const year = 2026, month = 10; // 10 = November (0-based)
+  const year = WEDDING_YEAR, month = WEDDING_MONTH;
   const first = new Date(year, month, 1);
   // JS getDay(): 0=Sun..6=Sat  ->  Monday-start offset
   const offset = (first.getDay() + 6) % 7;
@@ -79,7 +80,7 @@ function buildCalendar(dict) {
   }
   for (let d = 1; d <= daysInMonth; d++) {
     const cell = document.createElement('div');
-    cell.className = 'day' + (d === 26 ? ' wed' : '');
+    cell.className = 'day' + (d === WEDDING_DAY ? ' wed' : '');
     cell.textContent = d;
     grid.appendChild(cell);
   }
@@ -183,13 +184,32 @@ $('#map-ceremony')  && ($('#map-ceremony').href  = MAP_CEREMONY);
 $('#map-reception') && ($('#map-reception').href = MAP_RECEPTION);
 
 /* ==========================================================================
-   9. RSVP form -> EmailJS
+   9. RSVP form -> /api/rsvp (stored in the database)
    ========================================================================== */
-if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-
 const form = $('#rsvp-form');
 const sendBtn = $('#send-btn');
 const formMsg = $('#form-msg');
+
+/* --- guests stepper: only shown when the guest is attending --- */
+const personsField = $('#persons-field');
+const personsVal   = $('#persons-val');
+const personsMinus = $('#persons-minus');
+const personsPlus  = $('#persons-plus');
+let persons = 1;
+
+function renderPersons() {
+  personsVal.textContent = persons;
+  personsMinus.disabled = persons <= 1;
+  personsPlus.disabled  = persons >= MAX_PERSONS;
+}
+personsMinus.addEventListener('click', () => { if (persons > 1)            { persons--; renderPersons(); } });
+personsPlus .addEventListener('click', () => { if (persons < MAX_PERSONS)  { persons++; renderPersons(); } });
+
+// show/hide the stepper based on the attendance answer
+$$('input[name="attendance"]').forEach(r =>
+  r.addEventListener('change', () => { personsField.hidden = r.value !== 'yes'; })
+);
+renderPersons();
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -204,27 +224,32 @@ form.addEventListener('submit', async (e) => {
   if (!attendance) { showMsg(dict.err_attend, true); return; }
   if (!name)       { showMsg(dict.err_name, true);   return; }
 
-  // human-readable values (in the chosen language)
-  const attendanceText = attendance.value === 'yes' ? dict.opt_yes : dict.opt_no;
-  const sideText = sides.map(s => s === 'groom' ? dict.side_groom : dict.side_bride).join(', ') || '—';
+  const attending = attendance.value === 'yes';
 
-  const params = {
-    to_email:    MY_EMAIL,
-    guest_name:  name,
-    attendance:  attendanceText,
-    invited_by:  sideText,
-    lang:        currentLang,
+  const payload = {
+    name,
+    attendance: attendance.value,               // 'yes' | 'no'
+    persons:    attending ? persons : 0,
+    side:       sides.join(','),                // '', 'groom', 'bride', 'groom,bride'
+    lang:       currentLang,
   };
 
   sendBtn.disabled = true;
   showMsg(dict.sending, false);
 
   try {
-    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params);
+    const res = await fetch('/api/rsvp', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     form.reset();
+    persons = 1; renderPersons();
+    personsField.hidden = true;
     showMsg(dict.success, false);
   } catch (err) {
-    console.error('EmailJS error:', err);
+    console.error('RSVP save failed:', err);
     showMsg(dict.error, true);
   } finally {
     sendBtn.disabled = false;

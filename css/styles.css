@@ -287,6 +287,23 @@ main{ opacity:0; transition:opacity 1s var(--ease); }
 .field > .q{ font-size:clamp(18px,3vw,22px); color:var(--gold-lt); margin-bottom:12px; font-family:var(--script); }
 .opt{ display:flex; align-items:center; gap:10px; margin:9px 0; font-size:17px; cursor:pointer; }
 .opt input{ accent-color:var(--gold); width:18px; height:18px; }
+/* guests stepper */
+.stepper{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.step-btn{
+  width:42px; height:42px; border-radius:50%; font-size:22px; line-height:1;
+  border:1px solid rgba(227,205,158,.6); background:rgba(74,14,24,.3);
+  color:var(--gold-lt); display:grid; place-items:center;
+  transition:background .25s, color .25s, transform .2s;
+}
+.step-btn:hover{ background:var(--gold-lt); color:var(--wine-deep); }
+.step-btn:active{ transform:scale(.92); }
+.step-btn:disabled{ opacity:.35; cursor:default; background:rgba(74,14,24,.3); color:var(--gold-lt); }
+.step-val{
+  min-width:52px; text-align:center; font-size:30px; color:var(--white);
+  font-family:var(--serif);
+}
+.step-hint{ font-size:14px; opacity:.7; color:var(--white); }
+
 .rsvp-form input[type=text]{
   width:100%; padding:12px 4px; background:transparent; border:0;
   border-bottom:1px solid rgba(227,205,158,.5); color:var(--white);

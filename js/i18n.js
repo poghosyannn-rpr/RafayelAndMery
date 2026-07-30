@@ -15,24 +15,24 @@ window.I18N = {
     name_1: "Ռաֆայել",
     amp:    "և",
     name_2: "Մերի",
-    date:   "26.11.26",
+    date:   "25.09.26",
 
     /* Invitation message */
     inv_title: "Սիրելի ընկերներ և հարազատներ",
     inv_text:  "Մեր սիրո ճանապարհը վաղուց է սկսվել, իսկ այս օրը նրա հանդիսավոր հաստատումն է։ Սիրով հրավիրում ենք Ձեզ կիսելու այս հատուկ օրը մեզ հետ։",
 
     /* Calendar */
-    cal_month: "Նոյեմբեր 2026",
+    cal_month: "Սեպտեմբեր 2026",
     wd_1: "Երկ", wd_2: "Երք", wd_3: "Չրք", wd_4: "Հնգ", wd_5: "Ուր", wd_6: "Շբթ", wd_7: "Կիր",
 
     /* Programme of the day */
     prog_title:      "Օրվա ծրագիր",
     ceremony_title:  "Պսակադրություն",
     ceremony_time:   "14:00",
-    ceremony_place:  "Սուրբ [Եկեղեցու անուն] եկեղեցի,\n[հասցե]",
+    ceremony_place:  "Կեչառիս վանական համալիր",
     reception_title: "Հարսանեկան խնջույք",
     reception_time:  "17:30",
-    reception_place: "«[Ռեստորանի անուն]» ռեստորան,\n[հասցե]",
+    reception_place: "Palais Wedding Hall",
     how_to_get:      "Ինչպես հասնել",
 
     /* Countdown */
@@ -50,6 +50,8 @@ window.I18N = {
     q_attend:      "Կներկա գտնվե՞ք միջոցառմանը",
     opt_yes:       "Այո, հաճույքով",
     opt_no:        "Ցավոք, չեմ կարող",
+    q_persons:     "Քանի՞ հոգով կգաք",
+    persons_hint:  "Ներառյալ Ձեզ",
     q_side:        "Ո՞ւմ կողմից եք հրավիրված",
     side_groom:    "Փեսայի կողմից",
     side_bride:    "Հարսի կողմից",
@@ -76,21 +78,21 @@ window.I18N = {
     name_1: "Rafayel",
     amp:    "&",
     name_2: "Mery",
-    date:   "26.11.26",
+    date:   "25.09.26",
 
     inv_title: "Dear friends and relatives",
     inv_text:  "Our love story began long ago, and this day is its solemn confirmation. We warmly invite you to share this special day with us.",
 
-    cal_month: "November 2026",
+    cal_month: "September 2026",
     wd_1: "Mon", wd_2: "Tue", wd_3: "Wed", wd_4: "Thu", wd_5: "Fri", wd_6: "Sat", wd_7: "Sun",
 
     prog_title:      "Programme of the day",
     ceremony_title:  "Wedding ceremony",
     ceremony_time:   "14:00",
-    ceremony_place:  "St. [Church name] Church,\n[address]",
+    ceremony_place:  "Kecharis Monastery",
     reception_title: "Wedding reception",
     reception_time:  "17:30",
-    reception_place: "“[Restaurant name]” Restaurant,\n[address]",
+    reception_place: "Palais Wedding Hall",
     how_to_get:      "How to get there",
 
     countdown_title: "Time left until our wedding",
@@ -105,6 +107,8 @@ window.I18N = {
     q_attend:      "Will you attend the celebration?",
     opt_yes:       "Yes, with pleasure",
     opt_no:        "Unfortunately, I can’t",
+    q_persons:     "How many of you will come?",
+    persons_hint:  "Including yourself",
     q_side:        "Whose guest are you?",
     side_groom:    "Groom’s side",
     side_bride:    "Bride’s side",
@@ -130,21 +134,21 @@ window.I18N = {
     name_1: "Рафаел",
     amp:    "и",
     name_2: "Мери",
-    date:   "26.11.26",
+    date:   "25.09.26",
 
     inv_title: "Дорогие друзья и родные",
     inv_text:  "Наш путь любви начался давно, и этот день — его торжественное подтверждение. С любовью приглашаем вас разделить этот особенный день с нами.",
 
-    cal_month: "Ноябрь 2026",
+    cal_month: "Сентябрь 2026",
     wd_1: "Пн", wd_2: "Вт", wd_3: "Ср", wd_4: "Чт", wd_5: "Пт", wd_6: "Сб", wd_7: "Вс",
 
     prog_title:      "Программа дня",
     ceremony_title:  "Венчание",
     ceremony_time:   "14:00",
-    ceremony_place:  "Церковь Св. [название],\n[адрес]",
+    ceremony_place:  "Монастырь Кечарис",
     reception_title: "Свадебный банкет",
     reception_time:  "17:30",
-    reception_place: "Ресторан «[название]»,\n[адрес]",
+    reception_place: "Palais Wedding Hall",
     how_to_get:      "Как добраться",
 
     countdown_title: "До нашей свадьбы осталось",
@@ -159,6 +163,8 @@ window.I18N = {
     q_attend:      "Придёте ли вы на торжество?",
     opt_yes:       "Да, с удовольствием",
     opt_no:        "К сожалению, не смогу",
+    q_persons:     "Сколько вас будет?",
+    persons_hint:  "Включая вас",
     q_side:        "С чьей стороны вы приглашены?",
     side_groom:    "Со стороны жениха",
     side_bride:    "Со стороны невесты",

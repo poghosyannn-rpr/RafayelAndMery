@@ -1,0 +1,91 @@
+/* ==========================================================================
+   Admin dashboard — reuses the palette variables from styles.css
+   ========================================================================== */
+body.admin{
+  background:linear-gradient(160deg,#4a0e18 0%, #6e1423 55%, #3d0d18 100%);
+  min-height:100vh; color:var(--white); overflow-x:hidden;
+}
+body.admin.sealed{ overflow:auto; height:auto; }
+
+/* ---------- login gate ---------- */
+.gate{ min-height:100vh; display:grid; place-items:center; padding:24px; }
+.gate-card{
+  width:min(92vw,380px); text-align:center; padding:38px 30px;
+  background:rgba(0,0,0,.22); border:1px solid rgba(227,205,158,.28);
+  border-radius:18px; backdrop-filter:blur(6px);
+}
+.gate-title{ font-family:var(--script); font-size:44px; font-weight:400; color:var(--gold-lt); }
+.gate-sub{ opacity:.65; font-size:15px; margin:4px 0 24px; }
+#key-input{
+  width:100%; padding:12px 14px; margin-bottom:14px; border-radius:10px;
+  border:1px solid rgba(227,205,158,.4); background:rgba(0,0,0,.25);
+  color:var(--white); font-family:var(--serif); font-size:17px; outline:none;
+}
+#key-input:focus{ border-color:var(--gold-lt); }
+.btn-gold{
+  width:100%; padding:12px; border:0; border-radius:999px;
+  background:linear-gradient(120deg,var(--gold),var(--gold-lt));
+  color:var(--wine-deep); font-family:var(--serif); font-size:17px; letter-spacing:.05em;
+  transition:transform .2s, box-shadow .2s;
+}
+.btn-gold:hover{ transform:translateY(-1px); box-shadow:0 10px 22px rgba(201,168,106,.35); }
+.gate-msg{ margin-top:14px; min-height:1.3em; font-size:15px; color:#ffd3d0; }
+
+/* ---------- dashboard ---------- */
+.dash{ max-width:1050px; margin:0 auto; padding:36px 22px 70px; }
+.dash-head{
+  display:flex; justify-content:space-between; align-items:flex-end;
+  gap:18px; flex-wrap:wrap; margin-bottom:28px;
+}
+.dash-title{ font-family:var(--script); font-size:clamp(34px,6vw,52px); font-weight:400; color:var(--gold-lt); line-height:1; }
+.dash-sub{ opacity:.6; font-size:14px; margin-top:6px; }
+.dash-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.btn-ghost{
+  padding:9px 18px; border-radius:999px; font-size:14px; letter-spacing:.03em;
+  border:1px solid rgba(227,205,158,.5); background:transparent; color:var(--gold-lt);
+  font-family:var(--serif); transition:background .25s, color .25s;
+}
+.btn-ghost:hover{ background:var(--gold-lt); color:var(--wine-deep); }
+
+/* headline total */
+.total-card{
+  text-align:center; padding:34px 20px; margin-bottom:20px; border-radius:20px;
+  background:radial-gradient(120% 140% at 50% 0%, rgba(201,168,106,.22), rgba(0,0,0,.22));
+  border:1px solid rgba(227,205,158,.35);
+}
+.total-label{ font-size:15px; letter-spacing:.16em; text-transform:uppercase; opacity:.75; }
+.total-num{
+  font-size:clamp(64px,16vw,120px); line-height:1; margin-top:8px;
+  color:var(--gold-lt); text-shadow:0 4px 26px rgba(201,168,106,.35);
+}
+
+/* stat chips */
+.chips{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:26px; }
+.chip{
+  flex:1 1 140px; padding:16px 18px; border-radius:14px; text-align:center;
+  background:rgba(0,0,0,.2); border:1px solid rgba(227,205,158,.22);
+}
+.chip-num{ display:block; font-size:32px; line-height:1; }
+.chip-lbl{ display:block; margin-top:5px; font-size:13px; letter-spacing:.08em; text-transform:uppercase; opacity:.65; }
+.chip.yes .chip-num{ color:#a8e6a3; }
+.chip.no  .chip-num{ color:#ffb3ad; }
+
+/* table */
+.table-wrap{
+  overflow-x:auto; border-radius:14px;
+  background:rgba(0,0,0,.2); border:1px solid rgba(227,205,158,.22);
+}
+.tbl{ width:100%; border-collapse:collapse; min-width:680px; }
+.tbl th, .tbl td{ padding:13px 16px; text-align:left; font-size:15px; white-space:nowrap; }
+.tbl thead th{
+  font-size:12px; letter-spacing:.1em; text-transform:uppercase; opacity:.6;
+  border-bottom:1px solid rgba(227,205,158,.25);
+}
+.tbl tbody tr{ border-bottom:1px solid rgba(255,255,255,.06); }
+.tbl tbody tr:last-child{ border-bottom:0; }
+.tbl tbody tr:hover{ background:rgba(255,255,255,.04); }
+.tbl td.name{ font-size:16px; }
+.pill{ padding:3px 11px; border-radius:999px; font-size:13px; }
+.pill.yes{ background:rgba(120,200,110,.18); color:#a8e6a3; }
+.pill.no{  background:rgba(220,110,100,.18); color:#ffb3ad; }
+.empty{ padding:34px; text-align:center; opacity:.6; }

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ռաֆայել & Մերի — 26.11.26</title>
-  <meta name="description" content="Wedding invitation — Rafayel & Mery, 26.11.2026" />
+  <title>Ռաֆայել & Մերի — 25.09.26</title>
+  <meta name="description" content="Wedding invitation — Rafayel & Mery, 25.09.2026" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Noto+Serif+Armenian:wght@400;500;600&display=swap" rel="stylesheet">
@@ -151,6 +151,16 @@
             <label class="opt"><input type="radio" name="attendance" value="no"><span data-i18n="opt_no"></span></label>
           </div>
 
+          <div class="field" id="persons-field" hidden>
+            <div class="q" data-i18n="q_persons"></div>
+            <div class="stepper">
+              <button type="button" class="step-btn" id="persons-minus" aria-label="-">&minus;</button>
+              <output class="step-val" id="persons-val">1</output>
+              <button type="button" class="step-btn" id="persons-plus" aria-label="+">+</button>
+              <span class="step-hint" data-i18n="persons_hint"></span>
+            </div>
+          </div>
+
           <div class="field">
             <div class="q" data-i18n="q_side"></div>
             <label class="opt"><input type="checkbox" name="side" value="groom"><span data-i18n="side_groom"></span></label>
@@ -183,8 +193,6 @@
     </footer>
   </main>
 
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/main.js"></script>
 </body>

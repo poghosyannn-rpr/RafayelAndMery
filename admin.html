@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>RSVP Admin — Rafayel &amp; Mery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Noto+Serif+Armenian:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="admin">
+
+  <!-- Login gate -->
+  <div class="gate" id="gate">
+    <div class="gate-card">
+      <h1 class="gate-title">RSVP Admin</h1>
+      <p class="gate-sub">Rafayel &amp; Mery — 25.09.2026</p>
+      <input type="password" id="key-input" placeholder="Admin key" autocomplete="current-password" />
+      <button id="key-btn" class="btn-gold">Open</button>
+      <div class="gate-msg" id="gate-msg"></div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <main class="dash" id="dash" hidden>
+    <header class="dash-head">
+      <div>
+        <h1 class="dash-title">RSVP responses</h1>
+        <p class="dash-sub">Rafayel &amp; Mery — 25.09.2026</p>
+      </div>
+      <div class="dash-actions">
+        <button id="refresh-btn" class="btn-ghost">Refresh</button>
+        <button id="csv-btn" class="btn-ghost">Download CSV</button>
+        <button id="logout-btn" class="btn-ghost">Lock</button>
+      </div>
+    </header>
+
+    <!-- The headline number -->
+    <section class="total-card">
+      <div class="total-label">Total guests attending</div>
+      <div class="total-num" id="total-persons">0</div>
+    </section>
+
+    <section class="chips">
+      <div class="chip"><span class="chip-num" id="stat-responses">0</span><span class="chip-lbl">Responses</span></div>
+      <div class="chip yes"><span class="chip-num" id="stat-yes">0</span><span class="chip-lbl">Attending</span></div>
+      <div class="chip no"><span class="chip-num" id="stat-no">0</span><span class="chip-lbl">Declined</span></div>
+    </section>
+
+    <section class="table-wrap">
+      <table class="tbl" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>Name</th><th>Attending</th><th>Guests</th>
+            <th>Side</th><th>Lang</th><th>Submitted</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+      <p class="empty" id="empty-msg" hidden>No responses yet.</p>
+    </section>
+  </main>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>
