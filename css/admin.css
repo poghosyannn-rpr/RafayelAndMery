@@ -282,7 +282,7 @@ body.tab-seating .dash{ max-width:none; padding-left:16px; padding-right:16px; }
 
 .floor-wrap{
   overflow:auto; border-radius:16px;
-  height:calc(100vh - 260px); min-height:420px;
+  height:calc(100vh - 200px); min-height:460px;
   /* faint grid so the floor reads as a plan and the tables stand out on it */
   background:
     linear-gradient(rgba(227,205,158,.06) 1px, transparent 1px) 0 0 / 40px 40px,
@@ -397,7 +397,7 @@ body.tab-seating .dash{ max-width:none; padding-left:16px; padding-right:16px; }
   position:sticky; top:14px; padding:16px; border-radius:16px;
   background:rgba(0,0,0,.24); border:1px solid rgba(227,205,158,.22);
   display:flex; flex-direction:column; gap:11px;
-  height:calc(100vh - 260px); min-height:420px;
+  height:calc(100vh - 200px); min-height:460px;
 }
 
 /* ---- fullscreen seating ---- */

@@ -6,7 +6,7 @@
    ========================================================================== */
 'use strict';
 
-const ADMIN_JS_VERSION = 14;      // bump with the ?v= in admin.html
+const ADMIN_JS_VERSION = 15;      // bump with the ?v= in admin.html
 console.log('admin.js v' + ADMIN_JS_VERSION + ' loaded');
 
 const $  = (s, r = document) => r.querySelector(s);
