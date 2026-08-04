@@ -19,7 +19,10 @@ const { DatabaseSync } = require('node:sqlite');
 
 /* ----- CONFIG (edit these) ------------------------------------------------- */
 const PORT      = process.env.PORT || 8000;
-const ADMIN_KEY = process.env.ADMIN_KEY || 'rafmery2026';   // password for the admin page
+// Only used ONCE, to create the owner account on a brand-new database.
+// No hard-coded fallback: the repo is public, so a default would be a public password.
+// If unset, a strong key is generated and printed once at first start.
+const ADMIN_KEY = process.env.ADMIN_KEY || crypto.randomBytes(9).toString('base64url');
 // In production set DB_PATH to a path on a PERSISTENT volume (e.g. /data/rsvp.db),
 // otherwise the database is wiped on every redeploy.
 const DB_PATH   = process.env.DB_PATH || path.join(__dirname, 'data', 'rsvp.db');
@@ -30,9 +33,6 @@ const OWNER_USERNAME = (process.env.OWNER_USERNAME || 'rafmery').toLowerCase();
 const OWNER_DISPLAY  = process.env.OWNER_DISPLAY  || 'Rafayel & Mery';
 const SESSION_DAYS   = 30;
 
-if (process.env.NODE_ENV === 'production' && ADMIN_KEY === 'rafmery2026') {
-  console.warn('  ⚠  ADMIN_KEY is still the default — set it as an env var on your host!\n');
-}
 
 /* ----- database ------------------------------------------------------------ */
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
@@ -179,7 +179,11 @@ const qOwner      = db.prepare(`SELECT * FROM users WHERE is_owner = 1 LIMIT 1`)
   const ownerId = Number(info.lastInsertRowid);
   ['rsvps', 'guests', 'seat_tables'].forEach(t =>
     db.exec(`UPDATE ${t} SET user_id = ${ownerId} WHERE user_id IS NULL`));
-  console.log(`  created owner "${OWNER_USERNAME}" and assigned all existing data to it`);
+  console.log(`\n  ┌─ OWNER ACCOUNT CREATED ────────────────────────────`);
+  console.log(`  │  username : ${OWNER_USERNAME}`);
+  console.log(`  │  key      : ${ADMIN_KEY}`);
+  console.log(`  │  Save this now — it is shown only once.`);
+  console.log(`  └────────────────────────────────────────────────────\n`);
 })();
 
 /* ----- sessions ------------------------------------------------------------ */
@@ -194,17 +198,15 @@ function newSession(userId) {
   return token;
 }
 
-/* The logged-in user for this request, or null. */
+/* The logged-in user for this request, or null.
+   Sessions only — there is deliberately NO shared-secret backdoor, because the
+   source is public and a hard-coded key would be readable by anyone. */
 function currentUser(req, url) {
   const token = req.headers['x-session'] || url?.searchParams.get('session');
-  if (token) {
-    const s = db.prepare(`SELECT * FROM sessions WHERE token = ?`).get(String(token));
-    if (s && s.expires_at > new Date().toISOString()) return qUserById.get(s.user_id) || null;
-  }
-  // legacy: the raw admin key still authenticates as the owner
-  const key = req.headers['x-admin-key'] || url?.searchParams.get('key');
-  if (key && key === ADMIN_KEY) return qOwner.get() || null;
-  return null;
+  if (!token) return null;
+  const s = db.prepare(`SELECT * FROM sessions WHERE token = ?`).get(String(token));
+  if (!s || s.expires_at <= new Date().toISOString()) return null;
+  return qUserById.get(s.user_id) || null;
 }
 
 /* Every statement below is scoped by user_id: reads filter by it, and writes
@@ -819,7 +821,7 @@ server.listen(PORT, () => {
   console.log(`  ─────────────────────────────────────────`);
   console.log(`  Invitation : http://localhost:${PORT}`);
   console.log(`  Admin page : http://localhost:${PORT}/admin.html`);
-  console.log(`  Owner login: ${owner ? owner.username : '(none)'} / ${ADMIN_KEY}`);
+  console.log(`  Owner      : ${owner ? owner.username : '(none)'}`);   // never log the key
   console.log(`  Accounts   : ${qAllUsers.all().length}`);
   console.log(`  Database   : ${DB_PATH}`);
   if (synced) console.log(`  Guests     : +${synced} created from RSVPs`);
