@@ -23,13 +23,19 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 /* ==========================================================================
    1. i18n
    ========================================================================== */
-let currentLang = localStorage.getItem('lang') || 'am';
+/* localStorage throws in some privacy modes — never let that break the page. */
+const langStore = {
+  get()  { try { return localStorage.getItem('lang'); } catch { return null; } },
+  set(v) { try { localStorage.setItem('lang', v); }     catch { /* ignore */ } },
+};
+
+let currentLang = langStore.get() || 'am';
 
 function applyLang(lang) {
   const dict = window.I18N[lang];
   if (!dict) return;
   currentLang = lang;
-  localStorage.setItem('lang', lang);
+  langStore.set(lang);
   document.documentElement.lang = dict.lang_html || lang;
 
   $$('[data-i18n]').forEach(el => {
@@ -217,7 +223,8 @@ form.addEventListener('submit', async (e) => {
 
   const attendance = form.querySelector('input[name="attendance"]:checked');
   const name = $('#guest-name').value.trim();
-  const sides = $$('input[name="side"]:checked').map(c => c.value);
+  // radio buttons — a guest is invited by one side
+  const sideInput = form.querySelector('input[name="side"]:checked');
 
   formMsg.classList.remove('error');
 
@@ -226,12 +233,16 @@ form.addEventListener('submit', async (e) => {
 
   const attending = attendance.value === 'yes';
 
+  // /u/<username> decides whose guest list this RSVP joins; "/" = the owner
+  const uMatch = location.pathname.match(/^\/u\/([a-z0-9-]+)\/?$/i);
+
   const payload = {
     name,
     attendance: attendance.value,               // 'yes' | 'no'
     persons:    attending ? persons : 0,
-    side:       sides.join(','),                // '', 'groom', 'bride', 'groom,bride'
+    side:       sideInput ? sideInput.value : '',  // '' | 'groom' | 'bride'
     lang:       currentLang,
+    user:       uMatch ? uMatch[1].toLowerCase() : undefined,
   };
 
   sendBtn.disabled = true;

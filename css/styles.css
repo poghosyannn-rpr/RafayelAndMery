@@ -176,8 +176,11 @@ button{ font-family:inherit; cursor:pointer; }
 /* ==========================================================================
    SHARED SECTION STYLES
    ========================================================================== */
-main{ opacity:0; transition:opacity 1s var(--ease); }
-.opened main{ opacity:1; }
+/* Scoped to #main (the invitation's <main>) on purpose — a bare `main` selector
+   also matched the admin dashboard's <main class="dash">, which never gets the
+   .opened class and so stayed invisible at opacity 0. */
+#main{ opacity:0; transition:opacity 1s var(--ease); }
+.opened #main{ opacity:1; }
 
 .section{
   position:relative; min-height:100vh;

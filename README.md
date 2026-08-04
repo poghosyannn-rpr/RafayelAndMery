@@ -79,6 +79,117 @@ Open `/admin.html`, enter the admin key. It shows:
 The key is stored only in `sessionStorage` (cleared when the tab closes); "Lock"
 clears it immediately.
 
+## Accounts (multi-user)
+
+Each account has its own **guests, tables, seating and RSVPs** — they never see each
+other's data. Sign in at `/admin.html` with a **username + secret key**.
+
+- **Owner account** — created automatically on first run from `ADMIN_KEY`:
+  username `rafmery` (change with the `OWNER_USERNAME` env var), display
+  "Rafayel & Mery". All pre-existing data was assigned to it.
+- **Adding users** — only the owner sees the **Users** tab. Create a user with a
+  username, display name and secret key. Keys are stored **scrypt-hashed and can never
+  be read back** — write it down when you create it (you can always reset it later).
+- **Each user's invitation link** is `/u/<username>`. An RSVP submitted there lands in
+  *that* user's guest list. The bare `/` belongs to the owner.
+- **Account tab** — change your own key (this signs you out everywhere).
+- Sessions last 30 days and survive a server restart. **Lock** ends the session.
+
+> The invitation *design and text* is currently shared by all accounts — a second couple
+> would still see the Rafayel & Mery page. Per-user invitation content is a separate
+> feature.
+
+## The admin page (`/admin.html`)
+
+Tabs behind the login:
+
+### 1. Guests — every individual person
+An RSVP for a *party* is expanded into **one row per person**: "Anna" with 4 guests
+becomes `Anna`, `Anna +1`, `Anna +2`, `Anna +3`. Each row can be **renamed inline**
+(click the name, type, press Enter) — rename the `+1`s once you know who's coming.
+
+- **Side** is shown as an icon — a blue **bow tie** for the groom's side, a pink
+  **gown** for the bride's side (hover for the label). The side filter uses the
+  same two icons.
+- **Qty** shows how many people were added together under that name, so a group
+  of 3 shows a highlighted **3** on each of its rows.
+- **Source badge** — gold **Manual** (you typed it in) vs grey **Form** (came from the
+  website RSVP).
+- **+ Add guest** — add someone by hand (name + side + **People**). Setting
+  People to 3 under "Rafayel" creates **Rafayel 1**, **Rafayel 2**, **Rafayel 3**
+  as three separately seatable rows (max 20 at a time). A count of 1 keeps the
+  bare name. RSVPs from the website use the same naming.
+- **Filter** by groom's/bride's side, plus a name search.
+- **×** removes a guest. Removed people are never re-created by the sync.
+
+### 2. Seating — the floor plan
+- **+ Add table** drops a new round table; each has a **number** and seats **12**.
+- **Zoom** the floor plan with **− / + **, click the percentage to reset to 100%,
+  or **Fit** to bring every table into view. **Ctrl + mouse wheel** zooms around
+  the cursor. The zoom level is remembered between visits, and dragging stays
+  accurate at any zoom.
+- **Drag a table by its number** to move it. Positions are saved.
+- **Drag a name** from the right-hand panel onto a table to seat them.
+  Drag between tables to move, or back to the panel to unseat.
+- The right panel shows the **unseated guests and the count**; the same
+  side filter/search applies. Hover a table and click **×** to delete it —
+  its guests return to the panel.
+- **The 12-seat limit is enforced by the server**, so a full table rejects the drop
+  and flashes red even if two people are editing at once.
+
+### 3. Submissions — the raw RSVPs exactly as they were sent, plus **Download CSV**.
+
+> **Guest counts never change by themselves.** Lowering an RSVP's guest count does
+> **not** delete people who are already seated — remove them by hand, so a finished
+> seating plan is never silently broken.
+
+### Seating API (all require the admin key)
+`GET /api/seating` · `POST /api/guests` · `PATCH|DELETE /api/guests/:id` ·
+`POST /api/tables` · `PATCH|DELETE /api/tables/:id`
+
+## Deploying (GitHub → live site)
+
+> **GitHub Pages will not work for this app.** Pages serves static files only — it
+> can't run `server.js` or SQLite, so the RSVP form and admin page would break.
+> The app needs a Node host. Your GitHub repo is still the source: the host rebuilds
+> automatically every time you push.
+
+The repo already contains everything a host needs: `package.json` (`npm start`,
+Node ≥ 22.5), a pinned `Dockerfile` (Node 22 — required for `node:sqlite`),
+`.dockerignore` and `fly.toml`.
+
+**Two things you MUST set on the host:**
+
+| Env var | Value | Why |
+|---|---|---|
+| `DB_PATH` | `/data/rsvp.db` | must point at a **persistent volume**, or RSVPs are wiped on every redeploy |
+| `ADMIN_KEY` | your own secret | don't ship the default |
+
+### Option A — Railway (easiest, no CLI)
+1. <https://railway.app> → **New Project → Deploy from GitHub repo** → pick
+   `RafayelAndMery`. It auto-detects the Dockerfile and builds.
+2. **Variables** tab → add `ADMIN_KEY` (your secret) and `DB_PATH` = `/data/rsvp.db`.
+3. **Volumes** → add a volume mounted at `/data`.
+4. **Settings → Networking → Generate Domain** → your public URL.
+
+### Option B — Fly.io (uses `fly.toml`)
+```bash
+fly launch --no-deploy                     # edit `app` in fly.toml to a free name
+fly volumes create rsvp_data --size 1 --region cdg
+fly secrets set ADMIN_KEY=your-secret-here
+fly deploy
+```
+
+After either: open `https://<your-url>/` for the invitation and
+`https://<your-url>/admin.html` for the RSVP table. Both are HTTPS, so the admin
+key isn't sent in the clear.
+
+### Updating the live site
+```bash
+git add -A && git commit -m "update" && git push
+```
+Railway redeploys on push; for Fly run `fly deploy`.
+
 ## Backups & hosting
 
 - All responses live in **`data/rsvp.db`** — copy that file to back them up.

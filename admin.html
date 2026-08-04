@@ -8,28 +8,53 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Noto+Serif+Armenian:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="css/admin.css" />
+  <!-- ?v= forces browsers to fetch the new file instead of a stale cached copy.
+       Bump the number whenever these files change. -->
+  <link rel="stylesheet" href="css/styles.css?v=14" />
+  <link rel="stylesheet" href="css/admin.css?v=14" />
+  <script>
+    /* Inline on purpose: this runs even if an external script fails to load or
+       throws, so a broken page can never look like "nothing happened". */
+    window.addEventListener('error', function (e) {
+      var box = document.getElementById('gate-msg');
+      if (box) box.textContent = 'Script error: ' + (e.message || 'unknown') +
+        ' — press Ctrl+F5, then tell Claude this message.';
+    });
+    window.addEventListener('DOMContentLoaded', function () {
+      // if admin.js never ran, the login button has no handler at all
+      setTimeout(function () {
+        if (!window.Admin) {
+          var box = document.getElementById('gate-msg');
+          if (box) box.textContent =
+            'admin.js did not load. Press Ctrl+F5. If it persists, check the browser console (F12).';
+        }
+      }, 800);
+    });
+  </script>
 </head>
 <body class="admin">
 
   <!-- Login gate -->
   <div class="gate" id="gate">
-    <div class="gate-card">
+    <!-- A real <form> so Enter submits. onsubmit="return false" is inline on
+         purpose: it stops the browser navigating even if the JS below is an
+         old cached copy that doesn't call preventDefault(). -->
+    <form class="gate-card" id="gate-form" onsubmit="return false" action="#">
       <h1 class="gate-title">RSVP Admin</h1>
-      <p class="gate-sub">Rafayel &amp; Mery — 25.09.2026</p>
-      <input type="password" id="key-input" placeholder="Admin key" autocomplete="current-password" />
-      <button id="key-btn" class="btn-gold">Open</button>
+      <p class="gate-sub">Sign in to your wedding workspace</p>
+      <input type="text" id="user-input" placeholder="Username" autocomplete="username" autocapitalize="none" spellcheck="false" />
+      <input type="password" id="key-input" placeholder="Secret key" autocomplete="current-password" />
+      <button id="key-btn" type="submit" class="btn-gold">Open</button>
       <div class="gate-msg" id="gate-msg"></div>
-    </div>
+    </form>
   </div>
 
   <!-- Dashboard -->
   <main class="dash" id="dash" hidden>
     <header class="dash-head">
       <div>
-        <h1 class="dash-title">RSVP responses</h1>
-        <p class="dash-sub">Rafayel &amp; Mery — 25.09.2026</p>
+        <h1 class="dash-title" id="who-title">Wedding admin</h1>
+        <p class="dash-sub" id="who-sub">25.09.2026</p>
       </div>
       <div class="dash-actions">
         <button id="refresh-btn" class="btn-ghost">Refresh</button>
@@ -38,32 +63,204 @@
       </div>
     </header>
 
-    <!-- The headline number -->
-    <section class="total-card">
-      <div class="total-label">Total guests attending</div>
-      <div class="total-num" id="total-persons">0</div>
+    <!-- Tabs -->
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tab="guests">Guests</button>
+      <button class="tab" data-tab="seating">Seating</button>
+      <button class="tab" data-tab="submissions">Submissions</button>
+      <button class="tab" data-tab="users" id="tab-users" hidden>Users</button>
+      <button class="tab" data-tab="account">Account</button>
+    </nav>
+
+    <!-- ============ TAB 1 : GUESTS ============ -->
+    <section class="tab-panel" id="panel-guests">
+
+      <section class="total-card">
+        <div class="total-label">Total guests attending</div>
+        <div class="total-num" id="total-persons">0</div>
+      </section>
+
+      <section class="chips">
+        <div class="chip"><span class="chip-num" id="stat-total">0</span><span class="chip-lbl">People</span></div>
+        <div class="chip"><span class="chip-num" id="stat-seated">0</span><span class="chip-lbl">Seated</span></div>
+        <div class="chip"><span class="chip-num" id="stat-unseated">0</span><span class="chip-lbl">Unseated</span></div>
+        <div class="chip" title="Groom’s side">
+          <span class="chip-num" id="stat-groom">0</span>
+          <span class="chip-lbl"><span class="side-ico groom"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.4 9.2h3.2v5.6h-3.2z"/><path d="M10 12 2.6 7.4v9.2z"/><path d="M14 12l7.4-4.6v9.2z"/></svg></span> Groom</span>
+        </div>
+        <div class="chip" title="Bride’s side">
+          <span class="chip-num" id="stat-bride">0</span>
+          <span class="chip-lbl"><span class="side-ico bride"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c-1.2 1.6-1.8 3-1.8 4.3 0 1 .3 1.9.8 2.8L8.3 20h7.4l-2.7-10.9c.5-.9.8-1.8.8-2.8C13.8 5 13.2 3.6 12 2z"/></svg></span> Bride</span>
+        </div>
+      </section>
+
+      <!-- add a person by hand -->
+      <form class="add-row" id="add-guest-form">
+        <input type="text" id="add-name" placeholder="Guest name" autocomplete="off" />
+        <select id="add-side">
+          <option value="">Side —</option>
+          <option value="groom">Groom’s side</option>
+          <option value="bride">Bride’s side</option>
+        </select>
+        <label class="count-field" title="How many people to add under this name">
+          <span>People</span>
+          <input type="number" id="add-count" min="1" max="20" value="1" />
+        </label>
+        <button type="submit" class="btn-gold btn-inline">+ Add guest</button>
+        <span class="add-msg" id="add-msg"></span>
+      </form>
+      <p class="add-hint">Adding 3 under “Rafayel” creates <em>Rafayel 1</em>, <em>Rafayel 2</em>, <em>Rafayel 3</em> — each seatable separately.</p>
+
+      <!-- filter + search -->
+      <div class="filters">
+        <div class="seg" id="side-filter">
+          <button class="seg-btn active" data-side="all">All</button>
+          <button class="seg-btn icon-btn" data-side="groom" title="Groom’s side" aria-label="Groom’s side">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.4 9.2h3.2v5.6h-3.2z"/><path d="M10 12 2.6 7.4v9.2z"/><path d="M14 12l7.4-4.6v9.2z"/></svg>
+          </button>
+          <button class="seg-btn icon-btn" data-side="bride" title="Bride’s side" aria-label="Bride’s side">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c-1.2 1.6-1.8 3-1.8 4.3 0 1 .3 1.9.8 2.8L8.3 20h7.4l-2.7-10.9c.5-.9.8-1.8.8-2.8C13.8 5 13.2 3.6 12 2z"/></svg>
+          </button>
+        </div>
+        <input type="search" id="guest-search" placeholder="Search name…" />
+        <span class="filter-count" id="filter-count"></span>
+      </div>
+
+      <section class="table-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th title="Drag to reorder"></th><th>#</th><th>Name</th><th>Side</th><th title="People in this party — use − / + to change">Qty</th><th>Source</th><th>Table</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="guests-body"></tbody>
+        </table>
+        <p class="empty" id="guests-empty" hidden>No guests yet.</p>
+      </section>
     </section>
 
-    <section class="chips">
-      <div class="chip"><span class="chip-num" id="stat-responses">0</span><span class="chip-lbl">Responses</span></div>
-      <div class="chip yes"><span class="chip-num" id="stat-yes">0</span><span class="chip-lbl">Attending</span></div>
-      <div class="chip no"><span class="chip-num" id="stat-no">0</span><span class="chip-lbl">Declined</span></div>
+    <!-- ============ TAB 2 : SEATING ============ -->
+    <section class="tab-panel" id="panel-seating" hidden>
+      <div class="seat-toolbar">
+        <div class="add-table-group" role="group" aria-label="Add a table">
+          <button class="btn-gold btn-inline" id="add-table-btn" title="Add a round table">
+            <span class="shape-ico round" aria-hidden="true"></span> Round table
+          </button>
+          <button class="btn-gold btn-inline" id="add-rect-btn" title="Add a rectangular table">
+            <span class="shape-ico rect" aria-hidden="true"></span> Rectangle table
+          </button>
+        </div>
+
+        <div class="zoom-ctl" role="group" aria-label="Zoom the floor plan">
+          <button type="button" id="zoom-out" title="Zoom out (Ctrl + mouse wheel)">−</button>
+          <button type="button" id="zoom-level" title="Reset to 100%">100%</button>
+          <button type="button" id="zoom-in" title="Zoom in (Ctrl + mouse wheel)">+</button>
+          <button type="button" id="zoom-fit" title="Fit all tables in view">Fit</button>
+        </div>
+
+        <button type="button" class="btn-ghost btn-inline" id="fs-btn"
+                title="Use the whole screen (Esc to exit)">⛶ Fullscreen</button>
+
+        <span class="seat-hint">Drag a name onto a table to seat them · drag a table by its label to move it</span>
+      </div>
+
+      <div class="seat-layout">
+        <!-- floor plan -->
+        <div class="floor-wrap" id="floor-wrap">
+          <!-- canvas is resized to floor × zoom so scrollbars stay correct -->
+          <div class="floor-canvas" id="floor-canvas">
+            <div class="floor" id="floor">
+              <p class="floor-empty" id="floor-empty">No tables yet — click “+ Add table”.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- unseated guests -->
+        <aside class="seat-panel">
+          <div class="seat-panel-head">
+            <h2>Guests</h2>
+            <div class="seat-counts" id="seat-counts">0 unseated · 0 total</div>
+          </div>
+
+          <div class="seg small" id="seat-side-filter">
+            <button class="seg-btn active" data-side="all">All</button>
+            <button class="seg-btn icon-btn" data-side="groom" title="Groom’s side" aria-label="Groom’s side">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.4 9.2h3.2v5.6h-3.2z"/><path d="M10 12 2.6 7.4v9.2z"/><path d="M14 12l7.4-4.6v9.2z"/></svg>
+            </button>
+            <button class="seg-btn icon-btn" data-side="bride" title="Bride’s side" aria-label="Bride’s side">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c-1.2 1.6-1.8 3-1.8 4.3 0 1 .3 1.9.8 2.8L8.3 20h7.4l-2.7-10.9c.5-.9.8-1.8.8-2.8C13.8 5 13.2 3.6 12 2z"/></svg>
+            </button>
+          </div>
+          <input type="search" id="seat-search" placeholder="Search name…" />
+
+          <div class="pool" id="pool"></div>
+          <p class="pool-empty" id="pool-empty" hidden>Everyone is seated 🎉</p>
+        </aside>
+      </div>
     </section>
 
-    <section class="table-wrap">
-      <table class="tbl" id="tbl">
-        <thead>
-          <tr>
-            <th>#</th><th>Name</th><th>Attending</th><th>Guests</th>
-            <th>Side</th><th>Lang</th><th>Submitted</th>
-          </tr>
-        </thead>
-        <tbody id="tbl-body"></tbody>
-      </table>
-      <p class="empty" id="empty-msg" hidden>No responses yet.</p>
+    <!-- ============ TAB 3 : SUBMISSIONS ============ -->
+    <section class="tab-panel" id="panel-submissions" hidden>
+      <section class="chips">
+        <div class="chip"><span class="chip-num" id="stat-responses">0</span><span class="chip-lbl">Responses</span></div>
+        <div class="chip yes"><span class="chip-num" id="stat-yes">0</span><span class="chip-lbl">Attending</span></div>
+        <div class="chip no"><span class="chip-num" id="stat-no">0</span><span class="chip-lbl">Declined</span></div>
+      </section>
+
+      <section class="table-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Attending</th><th>Guests</th>
+              <th>Side</th><th>Lang</th><th>Submitted</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-body"></tbody>
+        </table>
+        <p class="empty" id="empty-msg" hidden>No responses yet.</p>
+      </section>
+    </section>
+
+    <!-- ============ TAB 4 : USERS (owner only) ============ -->
+    <section class="tab-panel" id="panel-users" hidden>
+      <form class="add-row" id="add-user-form">
+        <input type="text" id="nu-username" placeholder="username (a-z, 0-9, -)" autocapitalize="none" spellcheck="false" />
+        <input type="text" id="nu-display" placeholder="Display name, e.g. Anna &amp; Davit" />
+        <input type="text" id="nu-key" placeholder="Secret key" />
+        <button type="submit" class="btn-gold btn-inline">+ Add user</button>
+        <span class="add-msg" id="nu-msg"></span>
+      </form>
+      <p class="add-hint">Keys are stored hashed and can never be read back — note it down now.
+        Each user gets their own guests, tables and seating at <em>/u/username</em>.</p>
+
+      <section class="table-wrap">
+        <table class="tbl">
+          <thead>
+            <tr><th>#</th><th>Username</th><th>Display name</th><th>Invitation link</th>
+                <th>RSVPs</th><th>Guests</th><th>Tables</th><th></th></tr>
+          </thead>
+          <tbody id="users-body"></tbody>
+        </table>
+      </section>
+    </section>
+
+    <!-- ============ TAB 5 : ACCOUNT ============ -->
+    <section class="tab-panel" id="panel-account" hidden>
+      <section class="total-card">
+        <div class="total-label">Signed in as</div>
+        <div class="total-num" id="acct-name" style="font-size:clamp(28px,6vw,52px)">—</div>
+        <p class="dash-sub" id="acct-link"></p>
+      </section>
+      <form class="add-row" id="my-key-form">
+        <input type="password" id="my-key" placeholder="New secret key" autocomplete="new-password" />
+        <button type="submit" class="btn-gold btn-inline">Change my key</button>
+        <span class="add-msg" id="my-key-msg"></span>
+      </form>
+      <p class="add-hint">Changing your key signs you out of every device.</p>
     </section>
   </main>
 
-  <script src="js/admin.js"></script>
+  <script src="js/admin.js?v=14"></script>
+  <script src="js/seating.js?v=14"></script>
 </body>
 </html>
