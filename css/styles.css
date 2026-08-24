@@ -128,7 +128,7 @@ button{ font-family:inherit; cursor:pointer; }
 }
 
 .envelope{
-  position:relative; width:min(86vw,440px); aspect-ratio:6/5;
+  position:relative; width:min(86vw,440px); aspect-ratio:3/2;
   perspective:1400px;
   cursor:pointer;
   filter:drop-shadow(0 30px 50px rgba(0,0,0,.45));
@@ -153,15 +153,11 @@ button{ font-family:inherit; cursor:pointer; }
   clip-path:polygon(0 100%, 100% 100%, 50% 42%);
 }
 /* letter that slides up */
-/* IMG_2787.JPG is pre-cropped (see the Python step in the project history) to
-   the exact US Letter ratio (8.5:11 = 0.7727) — a real "letter" rectangle, not
-   an arbitrary crop. The envelope itself was loosened from 3:2 to 6:5 (still
-   landscape, but roomier) so this window can be both letter-proportioned AND
-   a reasonably prominent size — a narrower envelope shape left it looking like
-   a thin sliver even though the crop math was exact. Insets picked so the
-   window's own aspect ratio matches the photo's almost exactly (no crop). */
+/* IMG_2787.JPG is pre-cropped to a landscape ~400:293 ratio (both faces
+   framed, matches the envelope's own ~440x293 size at 3:2) — near-full-bleed,
+   just a small side margin, so the photo card is big and prominent again. */
 .env-letter{
-  position:absolute; left:21%; right:21%; top:5%; bottom:5%;
+  position:absolute; left:4.52%; right:4.52%; top:0%; bottom:0%;
   background:var(--cream); border-radius:6px; overflow:hidden;
   transform:translateY(0); transition:transform 1s var(--ease) .35s;
   z-index:2; box-shadow:0 6px 18px rgba(0,0,0,.25);
