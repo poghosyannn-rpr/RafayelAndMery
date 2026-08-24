@@ -139,6 +139,19 @@ becomes `Anna`, `Anna +1`, `Anna +2`, `Anna +3`. Each row can be **renamed inlin
 
 ### 3. Submissions — the raw RSVPs exactly as they were sent, plus **Download CSV**.
 
+### Exporting the seating plan
+Two buttons in the header, next to Download CSV, both organized **by table**
+(one section/card per table, guests numbered 1., 2., 3. …):
+
+- **Export all guests (Word)** — a `.docx` built server-side (zero dependencies —
+  it's hand-assembled as a ZIP of XML parts, no library). One page per table with
+  its name/number as the heading and a numbered guest list; anyone not yet seated
+  is listed under a final "Unassigned" section so nobody is silently left out.
+- **Export table cards (image)** — a single printable PNG sheet, a card per table
+  (table name/number as the title, numbered guests below), styled in the wedding's
+  cream/burgundy/gold palette — print and cut out for table-easel signs. Font size
+  shrinks automatically for a full 12-seat table so the list always fits the card.
+
 > **Guest counts never change by themselves.** Lowering an RSVP's guest count does
 > **not** delete people who are already seated — remove them by hand, so a finished
 > seating plan is never silently broken.

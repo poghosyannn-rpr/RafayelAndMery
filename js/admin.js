@@ -665,6 +665,126 @@ function downloadCsv() {
   URL.revokeObjectURL(a.href);
 }
 
+/* ----- Export: Word doc, one section per table (server-generated) --------- */
+async function downloadDocx() {
+  try {
+    const res = await api('/api/export/guests.docx');
+    if (!res.ok) { alert('Could not generate the Word document.'); return; }
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'guest-list-' + new Date().toISOString().slice(0, 10) + '.docx';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch { alert('Could not generate the Word document.'); }
+}
+
+/* ----- Export: printable table-card image (client-side canvas) ------------
+   One sheet, a card per table — table name/number as the title, then a
+   numbered guest list — styled to print and cut out, e.g. for table easels. */
+async function exportTableCardsImage() {
+  const A = window.Admin;
+  const tables = [...A.state.tables].sort((a, b) => a.number - b.number);
+  if (!tables.length) { alert('Add at least one table first.'); return; }
+
+  const byTable = new Map();
+  A.state.guests.forEach(g => {
+    if (!g.table_id) return;
+    if (!byTable.has(g.table_id)) byTable.set(g.table_id, []);
+    byTable.get(g.table_id).push(g);
+  });
+
+  // wait for the page's web fonts so canvas text isn't drawn with a fallback
+  try { await document.fonts.ready; } catch { /* ignore */ }
+
+  const CARD_W = 480, CARD_H = 640, GAP = 28, MARGIN = 40;
+  const cols = Math.min(4, tables.length);
+  const rows = Math.ceil(tables.length / cols);
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = MARGIN * 2 + cols * CARD_W + (cols - 1) * GAP;
+  canvas.height = MARGIN * 2 + rows * CARD_H + (rows - 1) * GAP;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#f3ede2';   // parchment sheet background
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const palette = { wine: '#6e1423', gold: '#c9a86a', ink: '#2a1418', cream: '#faf5ef' };
+  tables.forEach((t, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const x = MARGIN + col * (CARD_W + GAP);
+    const y = MARGIN + row * (CARD_H + GAP);
+    drawTableCard(ctx, x, y, CARD_W, CARD_H, t, byTable.get(t.id) || [], palette);
+  });
+
+  canvas.toBlob(blob => {
+    if (!blob) { alert('Could not generate the image.'); return; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'table-cards-' + new Date().toISOString().slice(0, 10) + '.png';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }, 'image/png');
+}
+
+function drawTableCard(ctx, x, y, w, h, table, guests, { wine, gold, ink, cream }) {
+  ctx.fillStyle = cream;
+  ctx.fillRect(x, y, w, h);
+  ctx.strokeStyle = gold;
+  ctx.lineWidth = 4;
+  ctx.strokeRect(x + 8, y + 8, w - 16, h - 16);
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x + 16, y + 16, w - 32, h - 32);
+
+  const cx = x + w / 2;
+
+  const title = table.name ? table.name : `Table ${table.number}`;
+  ctx.fillStyle = wine;
+  ctx.textAlign = 'center';
+  ctx.font = '700 40px "Cormorant Garamond", Georgia, serif';
+  ctx.fillText(title, cx, y + 90);
+  if (table.name) {
+    ctx.fillStyle = gold;
+    ctx.font = '400 20px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText(`Table ${table.number}`, cx, y + 120);
+  }
+
+  // small flourish divider
+  ctx.strokeStyle = gold;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x + 60, y + 145); ctx.lineTo(cx - 14, y + 145);
+  ctx.moveTo(cx + 14, y + 145); ctx.lineTo(x + w - 60, y + 145);
+  ctx.stroke();
+  ctx.fillStyle = gold;
+  ctx.beginPath(); ctx.arc(cx, y + 145, 4, 0, Math.PI * 2); ctx.fill();
+
+  // numbered guest list — shrinks to fit if the table is full
+  const listTop = y + 185, listBottom = y + h - 40;
+  const available = listBottom - listTop;
+  const n = Math.max(guests.length, 1);
+  let lineHeight = 24 * 1.55;
+  let fontSize = 24;
+  if (n * lineHeight > available) {
+    lineHeight = available / n;
+    fontSize = Math.max(14, Math.floor(lineHeight / 1.55));
+  }
+
+  ctx.textAlign = 'left';
+  if (!guests.length) {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#9a9088';
+    ctx.font = 'italic 18px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText('No guests seated', cx, listTop + 20);
+  } else {
+    ctx.fillStyle = ink;
+    ctx.font = `400 ${fontSize}px "Cormorant Garamond", Georgia, serif`;
+    guests.forEach((g, i) => {
+      ctx.fillText(`${i + 1}. ${g.name}`, x + 56, listTop + i * lineHeight + fontSize);
+    });
+  }
+}
+
 /* ----- gate ---------------------------------------------------------------- */
 function showGate(msg) {
   gate.hidden = false;
@@ -733,6 +853,8 @@ $('#refresh-btn').addEventListener('click', () => {
   });
 });
 $('#csv-btn').addEventListener('click', downloadCsv);
+$('#export-docx-btn').addEventListener('click', downloadDocx);
+$('#export-cards-btn').addEventListener('click', () => exportTableCardsImage());
 $('#logout-btn').addEventListener('click', async () => {
   try { await fetch('/api/logout', { method: 'POST', headers: { 'x-session': sessionToken } }); } catch {}
   store.remove('session');

@@ -306,6 +306,31 @@ function partyMemberName(name, index, total) {
   return total > 1 ? `${name} ${index + 1}` : name;
 }
 
+/* If the submitted name contains commas, each comma-separated piece becomes a
+   real person's name instead of the generic "<name> N" numbering — e.g. a
+   guest who types "Anna, Davit, Aram" with persons=3 becomes three actual
+   names, not "Anna, Davit, Aram 1/2/3". Any slot beyond the given names (a
+   declared count higher than what was typed) falls back to numbering off the
+   FIRST name, e.g. "Anna 3" rather than repeating the whole comma string.
+   A name with no comma (or only one usable piece) behaves exactly as before.
+   Returns { names, root } — `root` is the clean party title to store as
+   root_name (never a numbered "<name> 1", which is what the per-member NAMES
+   legitimately contain for a plain multi-person party). */
+function resolvePartyNames(rawName, count) {
+  const parts = String(rawName).split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length < 2) {
+    return {
+      names: Array.from({ length: count }, (_, i) => partyMemberName(rawName, i, count)),
+      root: rawName,
+    };
+  }
+  const base = parts[0];
+  return {
+    names: Array.from({ length: count }, (_, i) => i < parts.length ? parts[i] : `${base} ${i + 1}`),
+    root: base,
+  };
+}
+
 /* "Rafayel 1"/"Rafayel 2" -> "Rafayel"; a lone guest keeps their name. */
 function baseNameOf(members) {
   if (members.length === 1) return members[0].name;
@@ -340,12 +365,13 @@ function syncGuestsFromRsvps(userId) {
   for (const r of qAttendingRsvps.all(userId)) {
     const have = qGuestCountForRsvp.get(r.id).n;
     const want = Math.max(1, r.persons || 1);
+    const { names, root } = resolvePartyNames(r.name, want);   // comma-split names, or the usual "<name> N"
     for (let i = have; i < want; i++) {
-      insertGuest.run(partyMemberName(r.name, i, want), r.side || '', 'form',
+      insertGuest.run(names[i], r.side || '', 'form',
                       r.id, i, now, 'rsvp:' + r.id, userId);
       added++;
     }
-    if (have < want) refreshGroupNames('rsvp:' + r.id, userId, r.name);
+    if (have < want) refreshGroupNames('rsvp:' + r.id, userId, root);
   }
   return added;
 }
@@ -382,6 +408,156 @@ function readBody(req, limit = 1e5) {
     req.on('end', () => resolve(data));
     req.on('error', reject);
   });
+}
+
+/* ==========================================================================
+   Minimal ZIP writer, used to build .docx files (a .docx IS a zip archive of
+   XML parts). Zero dependencies — hand-rolled per the ZIP spec, STORE method
+   (no compression) since these files are small text and correctness matters
+   far more than size here.
+   ========================================================================== */
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(buf) {
+  let crc = 0xFFFFFFFF;
+  for (let i = 0; i < buf.length; i++) crc = CRC_TABLE[(crc ^ buf[i]) & 0xFF] ^ (crc >>> 8);
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+
+/* files: [{ name: 'word/document.xml', data: Buffer }] */
+function buildZip(files) {
+  const localParts = [];
+  const centralParts = [];
+  let offset = 0;
+
+  for (const f of files) {
+    const nameBuf = Buffer.from(f.name, 'utf8');
+    const data = f.data;
+    const crc = crc32(data);
+
+    const local = Buffer.alloc(30);
+    local.writeUInt32LE(0x04034b50, 0);   // local file header signature
+    local.writeUInt16LE(20, 4);           // version needed to extract
+    local.writeUInt16LE(0, 6);            // flags
+    local.writeUInt16LE(0, 8);            // method: 0 = store
+    local.writeUInt16LE(0, 10);           // mod time
+    local.writeUInt16LE(0x21, 12);        // mod date (a valid DOS date, avoids some readers choking on 0)
+    local.writeUInt32LE(crc, 14);
+    local.writeUInt32LE(data.length, 18); // compressed size
+    local.writeUInt32LE(data.length, 22); // uncompressed size
+    local.writeUInt16LE(nameBuf.length, 26);
+    local.writeUInt16LE(0, 28);           // extra field length
+    localParts.push(local, nameBuf, data);
+
+    const central = Buffer.alloc(46);
+    central.writeUInt32LE(0x02014b50, 0); // central directory signature
+    central.writeUInt16LE(20, 4);         // version made by
+    central.writeUInt16LE(20, 6);         // version needed
+    central.writeUInt16LE(0, 8);
+    central.writeUInt16LE(0, 10);
+    central.writeUInt16LE(0, 12);
+    central.writeUInt16LE(0x21, 14);
+    central.writeUInt32LE(crc, 16);
+    central.writeUInt32LE(data.length, 20);
+    central.writeUInt32LE(data.length, 24);
+    central.writeUInt16LE(nameBuf.length, 28);
+    central.writeUInt16LE(0, 30);         // extra length
+    central.writeUInt16LE(0, 32);         // comment length
+    central.writeUInt16LE(0, 34);         // disk number start
+    central.writeUInt16LE(0, 36);         // internal attrs
+    central.writeUInt32LE(0, 38);         // external attrs
+    central.writeUInt32LE(offset, 42);    // offset of local header
+    centralParts.push(central, nameBuf);
+
+    offset += local.length + nameBuf.length + data.length;
+  }
+
+  const centralDirStart = offset;
+  const centralDir = Buffer.concat(centralParts);
+
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50, 0);        // end of central directory signature
+  eocd.writeUInt16LE(0, 4);
+  eocd.writeUInt16LE(0, 6);
+  eocd.writeUInt16LE(files.length, 8);      // entries on this disk
+  eocd.writeUInt16LE(files.length, 10);     // total entries
+  eocd.writeUInt32LE(centralDir.length, 12);
+  eocd.writeUInt32LE(centralDirStart, 16);
+  eocd.writeUInt16LE(0, 20);                // comment length
+
+  return Buffer.concat([...localParts, centralDir, eocd]);
+}
+
+/* ----- .docx generation ----------------------------------------------------- */
+const DOCX_CONTENT_TYPES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`;
+
+const DOCX_ROOT_RELS = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+
+const DOCX_DOC_RELS = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+</Relationships>`;
+
+function xmlEscape(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+
+/* Builds a .docx Buffer: one section per table (title + numbered guest list),
+   a page break between tables, and a final "Unassigned" section for anyone
+   not seated. Pure string/XML — no template engine, just careful escaping. */
+function buildGuestListDocx(tables, guestsByTableId, unseated) {
+  const P_TITLE = (text) =>
+    `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="240" w:after="200"/></w:pPr>` +
+    `<w:r><w:rPr><w:b/><w:sz w:val="44"/></w:rPr><w:t xml:space="preserve">${xmlEscape(text)}</w:t></w:r></w:p>`;
+  const P_ITEM = (text) =>
+    `<w:p><w:pPr><w:spacing w:after="60"/></w:pPr>` +
+    `<w:r><w:rPr><w:sz w:val="24"/></w:rPr><w:t xml:space="preserve">${xmlEscape(text)}</w:t></w:r></w:p>`;
+  const P_BREAK = `<w:p><w:r><w:br w:type="page"/></w:r></w:p>`;
+
+  const parts = [];
+  tables.forEach((t, i) => {
+    const label = t.name ? `${t.name} (Table ${t.number})` : `Table ${t.number}`;
+    parts.push(P_TITLE(label));
+    const list = guestsByTableId.get(t.id) || [];
+    if (!list.length) parts.push(P_ITEM('(no guests seated)'));
+    list.forEach((g, gi) => parts.push(P_ITEM(`${gi + 1}. ${g.name}`)));
+    if (i < tables.length - 1 || unseated.length) parts.push(P_BREAK);
+  });
+  if (unseated.length) {
+    parts.push(P_TITLE('Unassigned'));
+    unseated.forEach((g, gi) => parts.push(P_ITEM(`${gi + 1}. ${g.name}`)));
+  }
+
+  const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>
+${parts.join('\n')}
+<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1417" w:bottom="1417" w:left="1417" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr>
+</w:body>
+</w:document>`;
+
+  return buildZip([
+    { name: '[Content_Types].xml',        data: Buffer.from(DOCX_CONTENT_TYPES, 'utf8') },
+    { name: '_rels/.rels',                data: Buffer.from(DOCX_ROOT_RELS, 'utf8') },
+    { name: 'word/document.xml',          data: Buffer.from(documentXml, 'utf8') },
+    { name: 'word/_rels/document.xml.rels', data: Buffer.from(DOCX_DOC_RELS, 'utf8') },
+  ]);
 }
 
 /* ----- static files -------------------------------------------------------- */
@@ -512,6 +688,39 @@ const server = http.createServer(async (req, res) => {
       });
     } catch (err) {
       console.error('GET /api/rsvps failed:', err);
+      return sendJson(res, 500, { ok: false, error: 'server error' });
+    }
+  }
+
+  /* --- GET /api/export/guests.docx : Word doc, one section per table --- */
+  if (pathname === '/api/export/guests.docx' && req.method === 'GET') {
+    const me = currentUser(req, url);
+    if (!me) return sendJson(res, 401, { ok: false, error: 'unauthorized' });
+    try {
+      const tables = qSeatTables.all(me.id);
+      const guests = qGuests.all(me.id);
+
+      const guestsByTableId = new Map();
+      const unseated = [];
+      guests.forEach(g => {
+        if (g.table_id) {
+          if (!guestsByTableId.has(g.table_id)) guestsByTableId.set(g.table_id, []);
+          guestsByTableId.get(g.table_id).push(g);
+        } else {
+          unseated.push(g);
+        }
+      });
+
+      const docxBuf = buildGuestListDocx(tables, guestsByTableId, unseated);
+      res.writeHead(200, {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'Content-Disposition': 'attachment; filename="guest-list.docx"',
+        'Content-Length': docxBuf.length,
+        'Cache-Control': 'no-store',
+      });
+      return res.end(docxBuf);
+    } catch (err) {
+      console.error('GET /api/export/guests.docx failed:', err);
       return sendJson(res, 500, { ok: false, error: 'server error' });
     }
   }
@@ -660,12 +869,13 @@ const server = http.createServer(async (req, res) => {
         const now = new Date().toISOString();
         // one group id for this batch, so the list can show the party size
         const gid = 'manual:' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+        const { names, root } = resolvePartyNames(name, count);   // comma-split names, or the usual "<name> N"
         const ids = [];
         for (let i = 0; i < count; i++) {
-          const info = insertGuest.run(partyMemberName(name, i, count), side, 'manual', null, i, now, gid, uid);
+          const info = insertGuest.run(names[i], side, 'manual', null, i, now, gid, uid);
           ids.push(Number(info.lastInsertRowid));
         }
-        refreshGroupNames(gid, uid, name);
+        refreshGroupNames(gid, uid, root);
         return sendJson(res, 200, { ok: true, ids, count });
       }
 
