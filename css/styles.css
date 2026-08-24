@@ -1,17 +1,23 @@
 /* ==========================================================================
    Rafayel & Mery — Wedding invitation
-   Palette: burgundy & blush-gold
+   Palette: charcoal grey & gold (admin.html keeps its own burgundy palette —
+   see the :root block in css/admin.css, which redeclares every variable used
+   here so this file's colors never leak into the admin dashboard)
    ========================================================================== */
 :root{
-  --wine:      #6e1423;
-  --wine-deep: #4a0e18;
-  --wine-soft: #8c1c30;
-  --blush:     #f4d9d9;
-  --blush-2:   #f7e7e4;
+  /* Dark charcoal/grey main color; gold accent kept as-is. Named --wine* etc.
+     for historical reasons (dozens of var() references below) but now hold
+     neutral greys — see the rgba() triples further down for the same shift
+     applied to hardcoded translucent overlays. */
+  --wine:      #3a3a3f;
+  --wine-deep: #1a1a1d;
+  --wine-soft: #4c4c53;
+  --blush:     #e7e3df;
+  --blush-2:   #efece8;
   --gold:      #c9a86a;
   --gold-lt:   #e3cd9e;
   --cream:     #faf5ef;
-  --ink:       #2a1418;
+  --ink:       #201f22;
   --white:     #fffaf6;
 
   --serif:  "Cormorant Garamond", "Noto Serif Armenian", Georgia, serif;
@@ -49,7 +55,7 @@ body.sealed{ overflow:hidden; height:100vh; }
 .page-bg-overlay{
   position:fixed; inset:0; z-index:1; pointer-events:none;
   background:
-    linear-gradient(180deg, rgba(42,20,24,.60) 0%, rgba(74,14,24,.52) 45%, rgba(58,12,22,.68) 100%);
+    linear-gradient(180deg, rgba(32,31,34,.60) 0%, rgba(26,26,29,.52) 45%, rgba(18,18,20,.68) 100%);
 }
 @keyframes kenburns{ from{ transform:scale(1.02);} to{ transform:scale(1.15);} }
 
@@ -60,7 +66,7 @@ button{ font-family:inherit; cursor:pointer; }
 .lang{
   position:fixed; top:18px; left:18px; z-index:60;
   display:flex; gap:6px;
-  background:rgba(74,14,24,.42);
+  background:rgba(26,26,29,.42);
   backdrop-filter:blur(6px);
   padding:6px 8px; border-radius:999px;
   border:1px solid rgba(227,205,158,.35);
@@ -70,9 +76,10 @@ button{ font-family:inherit; cursor:pointer; }
 .opened .lang{ opacity:1; transform:none; pointer-events:auto; }
 .lang button{
   width:30px; height:22px; border:0; border-radius:4px; padding:0;
-  background:transparent; font-size:16px; line-height:1; opacity:.55;
+  background:transparent; line-height:1; opacity:.55; overflow:hidden;
   transition:opacity .25s, transform .25s; filter:grayscale(.3);
 }
+.lang button svg{ width:100%; height:100%; display:block; }
 .lang button:hover{ opacity:.9; transform:translateY(-1px); }
 .lang button.active{ opacity:1; filter:none; box-shadow:0 0 0 2px var(--gold); }
 
@@ -81,7 +88,7 @@ button{ font-family:inherit; cursor:pointer; }
   position:fixed; top:16px; left:50%; transform:translateX(-50%);
   z-index:60; width:46px; height:46px; border-radius:50%;
   border:1px solid rgba(227,205,158,.5);
-  background:rgba(74,14,24,.42); backdrop-filter:blur(6px);
+  background:rgba(26,26,29,.42); backdrop-filter:blur(6px);
   color:var(--gold-lt); display:grid; place-items:center;
   opacity:0; transition:opacity .6s var(--ease) .3s; pointer-events:none;
 }
@@ -100,7 +107,7 @@ button{ font-family:inherit; cursor:pointer; }
   position:fixed; inset:0; z-index:50;
   display:grid; place-items:center;
   background:
-     radial-gradient(120% 90% at 50% 10%, #7d2233 0%, #5a1524 45%, #3d0d18 100%);
+     radial-gradient(120% 90% at 50% 10%, #45454b 0%, #2c2c30 45%, #1a1a1d 100%);
   transition:opacity 1s var(--ease), visibility 1s var(--ease);
   padding:20px;
 }
@@ -115,7 +122,7 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .env-note{
   position:absolute; bottom:8vh; left:0; right:0; text-align:center;
-  color:rgba(244,217,217,.82); font-size:clamp(14px,2.4vw,18px);
+  color:rgba(231,227,223,.82); font-size:clamp(14px,2.4vw,18px);
   line-height:1.7; max-width:620px; margin:0 auto; padding:0 22px;
   animation:floatIn 1s var(--ease) .2s both;
 }
@@ -129,20 +136,20 @@ button{ font-family:inherit; cursor:pointer; }
 /* envelope body */
 .env-body{
   position:absolute; inset:0; border-radius:8px;
-  background:linear-gradient(150deg, #8a4a3c, #6f3226);
+  background:linear-gradient(150deg, #4a4a50, #2c2c30);
   overflow:hidden;
 }
 /* the two side triangles + bottom (static paper look) */
 .env-body::before{ /* left/right V from bottom */
   content:""; position:absolute; inset:0;
   background:
-    linear-gradient(45deg,  #7a3a2e 0 50%, transparent 50%) bottom left /50% 100% no-repeat,
-    linear-gradient(-45deg, #7a3a2e 0 50%, transparent 50%) bottom right/50% 100% no-repeat;
+    linear-gradient(45deg,  #3a3a40 0 50%, transparent 50%) bottom left /50% 100% no-repeat,
+    linear-gradient(-45deg, #3a3a40 0 50%, transparent 50%) bottom right/50% 100% no-repeat;
   opacity:.9;
 }
 .env-body::after{ /* bottom triangle */
   content:""; position:absolute; left:0; right:0; bottom:0; top:0;
-  background:linear-gradient(to top, #62291f 0 0) no-repeat;
+  background:linear-gradient(to top, #1f1f22 0 0) no-repeat;
   clip-path:polygon(0 100%, 100% 100%, 50% 42%);
 }
 /* letter that slides up */
@@ -156,7 +163,7 @@ button{ font-family:inherit; cursor:pointer; }
 /* top flap (opens) */
 .env-flap{
   position:absolute; left:0; right:0; top:0; height:60%;
-  background:linear-gradient(165deg,#9a5748,#7a3a2e);
+  background:linear-gradient(165deg,#55555c,#3a3a40);
   clip-path:polygon(0 0, 100% 0, 50% 100%);
   transform-origin:top; transform:rotateX(0deg);
   transition:transform .8s var(--ease); z-index:5;
@@ -169,7 +176,7 @@ button{ font-family:inherit; cursor:pointer; }
 .seal{
   position:absolute; left:50%; top:52%; transform:translate(-50%,-50%);
   width:92px; height:92px; border-radius:50%; z-index:7;
-  background:radial-gradient(circle at 35% 30%, #a5324a, #6e1423 70%, #4a0e18);
+  background:radial-gradient(circle at 35% 30%, #55555c, #2e2e33 70%, #1a1a1d);
   display:grid; place-items:center; color:var(--gold-lt);
   box-shadow:0 6px 16px rgba(0,0,0,.45), inset 0 0 12px rgba(0,0,0,.4);
   font-family:var(--script); font-size:26px;
@@ -279,7 +286,7 @@ button{ font-family:inherit; cursor:pointer; }
 .cd-cell{
   width:clamp(64px,18vw,110px); aspect-ratio:1; border-radius:50%;
   border:1px solid rgba(227,205,158,.55); display:grid; place-items:center; align-content:center;
-  color:var(--white); background:rgba(74,14,24,.28); backdrop-filter:blur(3px);
+  color:var(--white); background:rgba(26,26,29,.28); backdrop-filter:blur(3px);
 }
 .cd-num{ font-size:clamp(24px,6vw,44px); line-height:1; }
 .cd-lbl{ font-size:clamp(10px,2vw,13px); letter-spacing:.08em; text-transform:uppercase; opacity:.8; margin-top:6px; }
@@ -295,13 +302,13 @@ button{ font-family:inherit; cursor:pointer; }
 .stepper{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
 .step-btn{
   width:42px; height:42px; border-radius:50%; font-size:22px; line-height:1;
-  border:1px solid rgba(227,205,158,.6); background:rgba(74,14,24,.3);
+  border:1px solid rgba(227,205,158,.6); background:rgba(26,26,29,.3);
   color:var(--gold-lt); display:grid; place-items:center;
   transition:background .25s, color .25s, transform .2s;
 }
 .step-btn:hover{ background:var(--gold-lt); color:var(--wine-deep); }
 .step-btn:active{ transform:scale(.92); }
-.step-btn:disabled{ opacity:.35; cursor:default; background:rgba(74,14,24,.3); color:var(--gold-lt); }
+.step-btn:disabled{ opacity:.35; cursor:default; background:rgba(26,26,29,.3); color:var(--gold-lt); }
 .step-val{
   min-width:52px; text-align:center; font-size:30px; color:var(--white);
   font-family:var(--serif);

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Noto+Serif+Armenian:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=17" />
+  <link rel="stylesheet" href="css/styles.css?v=19" />
 </head>
 <body class="sealed">
 
@@ -21,10 +21,34 @@
   <div class="page-bg-overlay" aria-hidden="true"></div>
 
   <!-- ===== Language switcher ===== -->
+  <!-- Flags are drawn as inline SVG, not emoji: flag emoji (regional-indicator
+       sequences) render blank/"tofu" on a lot of Windows Chrome installs, which
+       rely on the OS emoji font rather than bundling their own. SVG renders the
+       same everywhere. -->
   <nav class="lang" aria-label="Language">
-    <button data-lang="am" class="active" title="Հայերեն">🇦🇲</button>
-    <button data-lang="en" title="English">🇬🇧</button>
-    <button data-lang="ru" title="Русский">🇷🇺</button>
+    <button data-lang="am" class="active" title="Հայերեն" aria-label="Հայերեն">
+      <svg viewBox="0 0 60 30" preserveAspectRatio="none" aria-hidden="true">
+        <rect width="60" height="10" y="0"  fill="#D90012"/>
+        <rect width="60" height="10" y="10" fill="#0033A0"/>
+        <rect width="60" height="10" y="20" fill="#F2A800"/>
+      </svg>
+    </button>
+    <button data-lang="en" title="English" aria-label="English">
+      <svg viewBox="0 0 60 30" preserveAspectRatio="none" aria-hidden="true">
+        <rect width="60" height="30" fill="#00247d"/>
+        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="3"/>
+        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#cf142b" stroke-width="1"/>
+        <path d="M30,0 V30 M0,15 H60" stroke="#fff" stroke-width="6"/>
+        <path d="M30,0 V30 M0,15 H60" stroke="#cf142b" stroke-width="3"/>
+      </svg>
+    </button>
+    <button data-lang="ru" title="Русский" aria-label="Русский">
+      <svg viewBox="0 0 60 30" preserveAspectRatio="none" aria-hidden="true">
+        <rect width="60" height="10" y="0"  fill="#FFFFFF"/>
+        <rect width="60" height="10" y="10" fill="#0039A6"/>
+        <rect width="60" height="10" y="20" fill="#D52B1E"/>
+      </svg>
+    </button>
   </nav>
 
   <!-- ===== Music toggle ===== -->
@@ -188,7 +212,7 @@
     </footer>
   </main>
 
-  <script src="js/i18n.js?v=17"></script>
-  <script src="js/main.js?v=17"></script>
+  <script src="js/i18n.js?v=19"></script>
+  <script src="js/main.js?v=19"></script>
 </body>
 </html>
