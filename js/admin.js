@@ -6,7 +6,7 @@
    ========================================================================== */
 'use strict';
 
-const ADMIN_JS_VERSION = 15;      // bump with the ?v= in admin.html
+const ADMIN_JS_VERSION = 17;      // bump with the ?v= in admin.html
 console.log('admin.js v' + ADMIN_JS_VERSION + ' loaded');
 
 const $  = (s, r = document) => r.querySelector(s);
@@ -448,6 +448,8 @@ function renderSubmissions({ stats, rows }) {
   $('#stat-yes').textContent       = stats.yes;
   $('#stat-no').textContent        = stats.no;
 
+  renderDeclined(rows);
+
   const body = $('#tbl-body');
   body.innerHTML = '';
   $('#empty-msg').hidden = rows.length > 0;
@@ -480,6 +482,38 @@ function renderSubmissions({ stats, rows }) {
       tr.appendChild(td);
     });
     body.appendChild(tr);
+  });
+}
+
+/* People who answered "No" — visible here since they never become seatable
+   rows in the Guests / Seating tabs. */
+function renderDeclined(rows) {
+  const list = $('#declined-list');
+  if (!list) return;
+  const declined = rows.filter(r => r.attendance !== 'yes');
+
+  setText('#declined-count', declined.length);
+  $('#declined-empty').hidden = declined.length > 0;
+
+  list.innerHTML = '';
+  declined.forEach(r => {
+    const sides = (r.side || '').split(',').filter(Boolean);
+    const li = document.createElement('li');
+    li.className = 'declined-row';
+
+    const name = document.createElement('span');
+    name.className = 'declined-name';
+    name.textContent = r.name;
+    li.appendChild(name);
+
+    if (sides.length) sides.forEach(s => li.appendChild(sideIcon(s)));
+
+    const meta = document.createElement('span');
+    meta.className = 'declined-meta';
+    meta.textContent = (r.lang || '').toUpperCase() + ' · ' + new Date(r.created_at).toLocaleDateString();
+    li.appendChild(meta);
+
+    list.appendChild(li);
   });
 }
 

@@ -127,6 +127,24 @@ body.admin.sealed{ overflow:auto; height:auto; }
 .pill.no{  background:rgba(220,110,100,.18); color:#ffb3ad; }
 .empty{ padding:34px; text-align:center; opacity:.8; }
 
+/* ---- "Will not attend" card (Submissions tab) ---- */
+.declined-card{
+  margin-bottom:24px; padding:18px 20px; border-radius:14px;
+  background:rgba(220,110,100,.08); border:1px solid rgba(255,179,173,.3);
+}
+.declined-card h3{
+  font-family:var(--serif); font-size:16px; font-weight:600; letter-spacing:.03em;
+  color:#ffb3ad; margin-bottom:2px;
+}
+.declined-card .empty{ padding:10px 0 0; text-align:left; opacity:.7; font-size:14px; }
+.declined-list{ list-style:none; margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+.declined-row{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:8px 12px; border-radius:10px; background:rgba(0,0,0,.18);
+}
+.declined-name{ font-size:16px; color:var(--white); }
+.declined-meta{ margin-left:auto; font-size:12px; opacity:.6; white-space:nowrap; }
+
 /* ==========================================================================
    Tabs
    ========================================================================== */

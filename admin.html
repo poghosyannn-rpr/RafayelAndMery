@@ -10,8 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Noto+Serif+Armenian:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- ?v= forces browsers to fetch the new file instead of a stale cached copy.
        Bump the number whenever these files change. -->
-  <link rel="stylesheet" href="css/styles.css?v=15" />
-  <link rel="stylesheet" href="css/admin.css?v=15" />
+  <link rel="stylesheet" href="css/styles.css?v=17" />
+  <link rel="stylesheet" href="css/admin.css?v=17" />
   <script>
     /* Inline on purpose: this runs even if an external script fails to load or
        throws, so a broken page can never look like "nothing happened". */
@@ -207,6 +207,14 @@
         <div class="chip no"><span class="chip-num" id="stat-no">0</span><span class="chip-lbl">Declined</span></div>
       </section>
 
+      <!-- people who answered "No" — declined guests never become seatable
+           rows in Guests/Seating, so this is the only place they're visible -->
+      <section class="declined-card">
+        <h3>Will not attend (<span id="declined-count">0</span>)</h3>
+        <ul class="declined-list" id="declined-list"></ul>
+        <p class="empty" id="declined-empty" hidden>No declines yet.</p>
+      </section>
+
       <section class="table-wrap">
         <table class="tbl">
           <thead>
@@ -260,7 +268,7 @@
     </section>
   </main>
 
-  <script src="js/admin.js?v=15"></script>
-  <script src="js/seating.js?v=15"></script>
+  <script src="js/admin.js?v=17"></script>
+  <script src="js/seating.js?v=17"></script>
 </body>
 </html>

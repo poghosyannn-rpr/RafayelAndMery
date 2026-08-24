@@ -120,18 +120,27 @@ envelope.addEventListener('keydown', e => {
 const audio = $('#bg-audio');
 const musicBtn = $('#music-btn');
 let musicWanted = true;
+let musicStarted = false;   // true once playback has begun at least once
 
 function tryPlayMusic() {
   if (!musicWanted) return;
+  if (!musicStarted) audio.currentTime = 0;   // "from start" the very first time
   audio.play().then(() => {
+    musicStarted = true;
     musicBtn.classList.add('playing');
-  }).catch(() => { /* no audio file yet, or blocked */ });
+  }).catch(() => { /* autoplay blocked — will retry on the next user gesture */ });
 }
+
+// Best-effort attempt right when the page loads. Most browsers block audio
+// with sound before any user interaction, so this usually fails silently —
+// the guaranteed start is the envelope click below, which the browser always
+// counts as a user gesture.
+tryPlayMusic();
 
 musicBtn.addEventListener('click', () => {
   if (audio.paused) {
     musicWanted = true;
-    audio.play().then(() => musicBtn.classList.add('playing')).catch(() => {});
+    tryPlayMusic();
   } else {
     musicWanted = false;
     audio.pause();
@@ -148,17 +157,18 @@ const io = new IntersectionObserver((entries) => {
 $$('.reveal').forEach(el => io.observe(el));
 
 /* ==========================================================================
-   6. Hero slideshow
+   6. Page background slideshow — fixed behind the content, content scrolls
+      over it (see .page-bg / .pbg-slide in styles.css).
    ========================================================================== */
-(function slideshow() {
-  const slides = $$('.hero .slide');
+(function pageBgSlideshow() {
+  const slides = $$('.pbg-slide');
   if (slides.length < 2) return;
   let i = 0;
   setInterval(() => {
     slides[i].classList.remove('active');
     i = (i + 1) % slides.length;
     slides[i].classList.add('active');
-  }, 5000);
+  }, 6000);
 })();
 
 /* ==========================================================================
@@ -196,26 +206,45 @@ const form = $('#rsvp-form');
 const sendBtn = $('#send-btn');
 const formMsg = $('#form-msg');
 
-/* --- guests stepper: only shown when the guest is attending --- */
+/* --- guests stepper: only shown when the guest is attending -----------------
+   The <input type="number"> (#persons-val) is the single source of truth —
+   the − / + buttons and direct typing both read/write it, so they can never
+   fall out of sync. */
 const personsField = $('#persons-field');
 const personsVal   = $('#persons-val');
 const personsMinus = $('#persons-minus');
 const personsPlus  = $('#persons-plus');
-let persons = 1;
 
-function renderPersons() {
-  personsVal.textContent = persons;
-  personsMinus.disabled = persons <= 1;
-  personsPlus.disabled  = persons >= MAX_PERSONS;
+function getPersons() {
+  let v = parseInt(personsVal.value, 10);
+  if (!Number.isFinite(v)) v = 1;
+  return Math.min(Math.max(v, 1), MAX_PERSONS);
 }
-personsMinus.addEventListener('click', () => { if (persons > 1)            { persons--; renderPersons(); } });
-personsPlus .addEventListener('click', () => { if (persons < MAX_PERSONS)  { persons++; renderPersons(); } });
+function setPersons(v) {
+  v = Math.min(Math.max(v, 1), MAX_PERSONS);
+  personsVal.value = v;
+  personsMinus.disabled = v <= 1;
+  personsPlus.disabled  = v >= MAX_PERSONS;
+}
+personsMinus.addEventListener('click', () => setPersons(getPersons() - 1));
+personsPlus .addEventListener('click', () => setPersons(getPersons() + 1));
+
+// keep button enabled/disabled state live while typing, without clamping
+// mid-keystroke (that would fight the caret / block deleting a digit)
+personsVal.addEventListener('input', () => {
+  const v = parseInt(personsVal.value, 10);
+  personsMinus.disabled = Number.isFinite(v) && v <= 1;
+  personsPlus.disabled  = Number.isFinite(v) && v >= MAX_PERSONS;
+});
+// clamp/normalize once the guest leaves the field
+personsVal.addEventListener('blur', () => setPersons(getPersons()));
+personsVal.addEventListener('keydown', e => { if (e.key === 'Enter') personsVal.blur(); });
 
 // show/hide the stepper based on the attendance answer
 $$('input[name="attendance"]').forEach(r =>
   r.addEventListener('change', () => { personsField.hidden = r.value !== 'yes'; })
 );
-renderPersons();
+setPersons(1);
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -239,7 +268,7 @@ form.addEventListener('submit', async (e) => {
   const payload = {
     name,
     attendance: attendance.value,               // 'yes' | 'no'
-    persons:    attending ? persons : 0,
+    persons:    attending ? getPersons() : 0,
     side:       sideInput ? sideInput.value : '',  // '' | 'groom' | 'bride'
     lang:       currentLang,
     user:       uMatch ? uMatch[1].toLowerCase() : undefined,
@@ -256,7 +285,7 @@ form.addEventListener('submit', async (e) => {
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     form.reset();
-    persons = 1; renderPersons();
+    setPersons(1);
     personsField.hidden = true;
     showMsg(dict.success, false);
   } catch (err) {

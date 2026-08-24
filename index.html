@@ -8,9 +8,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Noto+Serif+Armenian:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=15" />
+  <link rel="stylesheet" href="css/styles.css?v=17" />
 </head>
 <body class="sealed">
+
+  <!-- ===== Fixed page background — 3-image slideshow. Content scrolls over it. ===== -->
+  <div class="page-bg" id="page-bg" aria-hidden="true">
+    <div class="pbg-slide active" style="background-image:url('assets/img/2026-07-26 14.02.17.jpg'); background-position:center center;"></div>
+    <div class="pbg-slide" style="background-image:url('assets/img/IMG_1198.JPG'); background-position:center 15%;"></div>
+    <div class="pbg-slide" style="background-image:url('assets/img/IMG_1994.jpg'); background-position:center center;"></div>
+  </div>
+  <div class="page-bg-overlay" aria-hidden="true"></div>
 
   <!-- ===== Language switcher ===== -->
   <nav class="lang" aria-label="Language">
@@ -24,7 +32,7 @@
     <svg class="ico-play"  viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
     <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
   </button>
-  <audio id="bg-audio" loop preload="none" src="assets/audio/music.mp3"></audio>
+  <audio id="bg-audio" loop preload="auto" src="assets/audio/music.mp3"></audio>
 
   <!-- ===== Envelope intro ===== -->
   <div class="envelope-screen" id="envelope-screen">
@@ -33,7 +41,7 @@
     <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open invitation">
       <span class="open-hint" data-i18n="open_hint"></span>
       <div class="env-body"></div>
-      <div class="env-letter"><img src="assets/img/IMG_2633.jpg" alt="Rafayel & Mery" /></div>
+      <div class="env-letter"><img src="assets/img/IMG_2787.JPG" alt="Rafayel & Mery" /></div>
       <div class="env-flap"></div>
       <div class="seal">R&amp;M</div>
     </div>
@@ -46,12 +54,6 @@
 
     <!-- HERO -->
     <section class="section hero" id="hero">
-      <div class="slides">
-        <div class="slide active" style="background-image:url('assets/img/IMG_2633.jpg')"></div>
-        <div class="slide" style="background-image:url('assets/img/we.jpg')"></div>
-        <div class="slide" style="background-image:url('assets/img/IMG_2604.jpg')"></div>
-        <div class="slide" style="background-image:url('assets/img/IMG_2603.jpg')"></div>
-      </div>
       <div class="inner">
         <h1 class="hero-names">
           <span data-i18n="name_1"></span><span class="amp" data-i18n="amp"></span><span data-i18n="name_2"></span>
@@ -65,7 +67,6 @@
 
     <!-- INVITATION MESSAGE -->
     <section class="section" id="invitation">
-      <div class="bg" style="background-image:url('assets/img/IMG_2648.jpg')"></div>
       <div class="inner">
         <h2 class="heading on-photo reveal" data-i18n="inv_title"></h2>
         <div class="divider reveal d1" aria-hidden="true">
@@ -77,7 +78,6 @@
 
     <!-- CALENDAR -->
     <section class="section" id="calendar">
-      <div class="bg" style="background-image:url('assets/img/IMG_2512.jpg')"></div>
       <div class="inner">
         <div class="calendar reveal">
           <div class="cal-month" data-i18n="cal_month"></div>
@@ -88,7 +88,6 @@
 
     <!-- PROGRAMME -->
     <section class="section" id="programme">
-      <div class="bg" style="background-image:url('assets/img/we.jpg')"></div>
       <div class="inner">
         <h2 class="heading on-photo reveal" data-i18n="prog_title"></h2>
         <div class="prog-grid">
@@ -112,7 +111,6 @@
 
     <!-- COUNTDOWN -->
     <section class="section" id="countdown">
-      <div class="bg" style="background-image:url('assets/img/IMG_2604.jpg')"></div>
       <div class="inner">
         <h2 class="heading on-photo reveal" data-i18n="countdown_title"></h2>
         <div class="cd-grid reveal d1">
@@ -126,7 +124,6 @@
 
     <!-- IMPORTANT INFO -->
     <section class="section" id="info">
-      <div class="bg" style="background-image:url('assets/img/IMG_2603.jpg')"></div>
       <div class="inner">
         <h2 class="heading on-photo reveal" data-i18n="info_title"></h2>
         <div class="divider reveal d1" aria-hidden="true">
@@ -139,7 +136,6 @@
 
     <!-- RSVP -->
     <section class="section rsvp" id="rsvp">
-      <div class="bg" style="background-image:url('assets/img/IMG_2467.jpg')"></div>
       <div class="inner">
         <h2 class="heading on-photo reveal" data-i18n="rsvp_title"></h2>
         <p class="lede on-photo reveal d1" data-i18n="rsvp_deadline"></p>
@@ -155,7 +151,7 @@
             <div class="q" data-i18n="q_persons"></div>
             <div class="stepper">
               <button type="button" class="step-btn" id="persons-minus" aria-label="-">&minus;</button>
-              <output class="step-val" id="persons-val">1</output>
+              <input class="step-val" id="persons-val" type="number" inputmode="numeric" min="1" max="10" value="1" />
               <button type="button" class="step-btn" id="persons-plus" aria-label="+">+</button>
               <span class="step-hint" data-i18n="persons_hint"></span>
             </div>
@@ -180,7 +176,6 @@
 
     <!-- FOOTER -->
     <footer class="section footer" id="footer">
-      <div class="bg" style="background-image:url('assets/img/IMG_2603.jpg')"></div>
       <div class="inner">
         <h2 class="heading reveal" data-i18n="footer_text"></h2>
         <div class="divider reveal d1" aria-hidden="true">
@@ -193,7 +188,7 @@
     </footer>
   </main>
 
-  <script src="js/i18n.js?v=15"></script>
-  <script src="js/main.js?v=15"></script>
+  <script src="js/i18n.js?v=17"></script>
+  <script src="js/main.js?v=17"></script>
 </body>
 </html>

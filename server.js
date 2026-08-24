@@ -35,9 +35,40 @@ const SESSION_DAYS   = 30;
 
 
 /* ----- database ------------------------------------------------------------ */
-fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-const db = new DatabaseSync(DB_PATH);
-db.exec(`PRAGMA foreign_keys = ON;`);
+/* Opening the database is the most common deployment failure (missing volume,
+   wrong DB_PATH, read-only mount). Fail with an explanation, not a stack trace. */
+let db;
+try {
+  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+  db = new DatabaseSync(DB_PATH);
+  db.exec(`PRAGMA foreign_keys = ON;`);
+} catch (err) {
+  const dir = path.dirname(DB_PATH);
+  let dirState = 'missing';
+  try {
+    fs.accessSync(dir, fs.constants.W_OK);  dirState = 'exists, writable';
+  } catch {
+    try { fs.accessSync(dir); dirState = 'exists but NOT writable'; } catch {}
+  }
+  console.error(`
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  Cannot open the database                                    ║
+  ╚══════════════════════════════════════════════════════════════╝
+   DB_PATH   : ${DB_PATH}
+   directory : ${dir}  ->  ${dirState}
+   node      : ${process.version}
+   error     : ${err.code || ''} ${err.message}
+
+   Most likely causes on a host:
+     1. No volume mounted at "${dir}".
+        Fly    : fly volumes create rsvp_data --size 1 --region <your region>
+        Railway: Service -> Settings -> Volumes -> mount path "${dir}"
+     2. DB_PATH points somewhere the volume is not mounted.
+        It must match the mount path exactly, e.g. DB_PATH=/data/rsvp.db
+     3. The mount is read-only, or owned by another user.
+`);
+  process.exit(1);
+}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS rsvps (

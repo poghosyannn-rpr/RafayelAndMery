@@ -26,12 +26,32 @@ html{ scroll-behavior:smooth; }
 body{
   font-family:var(--serif);
   color:var(--ink);
-  background:var(--cream);
+  background:var(--wine-deep);
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
 }
 /* Lock scroll until the envelope is opened */
 body.sealed{ overflow:hidden; height:100vh; }
+
+/* ==========================================================================
+   FIXED PAGE BACKGROUND — a 3-photo slideshow pinned to the viewport.
+   Content (everything in <main>) scrolls normally over it; because these two
+   layers use position:fixed they never move, giving the "background is a
+   slider, only the content scrolls" effect with no JS scroll-linking needed.
+   ========================================================================== */
+.page-bg{ position:fixed; inset:0; z-index:0; overflow:hidden; background:var(--wine-deep); }
+.pbg-slide{
+  position:absolute; inset:0; background-size:cover; background-position:center;
+  opacity:0; transition:opacity 2s var(--ease);
+  animation:kenburns 22s ease-in-out infinite alternate;
+}
+.pbg-slide.active{ opacity:1; }
+.page-bg-overlay{
+  position:fixed; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(42,20,24,.60) 0%, rgba(74,14,24,.52) 45%, rgba(58,12,22,.68) 100%);
+}
+@keyframes kenburns{ from{ transform:scale(1.02);} to{ transform:scale(1.15);} }
 
 img{ max-width:100%; display:block; }
 button{ font-family:inherit; cursor:pointer; }
@@ -132,7 +152,7 @@ button{ font-family:inherit; cursor:pointer; }
   transform:translateY(0); transition:transform 1s var(--ease) .35s;
   z-index:2; box-shadow:0 6px 18px rgba(0,0,0,.25);
 }
-.env-letter img{ width:100%; height:100%; object-fit:cover; }
+.env-letter img{ width:100%; height:100%; object-fit:cover; object-position:center 20%; }
 /* top flap (opens) */
 .env-flap{
   position:absolute; left:0; right:0; top:0; height:60%;
@@ -183,20 +203,11 @@ button{ font-family:inherit; cursor:pointer; }
 .opened #main{ opacity:1; }
 
 .section{
-  position:relative; min-height:100vh;
+  position:relative; z-index:2; min-height:100vh;
   display:grid; place-items:center; text-align:center;
   padding:80px 22px; overflow:hidden;
 }
 .section .inner{ position:relative; z-index:3; max-width:760px; width:100%; }
-
-/* photo backgrounds */
-.bg{
-  position:absolute; inset:0; z-index:0;
-  background-size:cover; background-position:center;
-}
-.bg::after{ content:""; position:absolute; inset:0;
-  background:linear-gradient(to bottom, rgba(42,20,24,.55), rgba(74,14,24,.45)); }
-.bg.light::after{ background:rgba(250,245,239,.82); }
 
 /* scroll reveal */
 .reveal{ opacity:0; transform:translateY(34px); transition:opacity 1s var(--ease), transform 1s var(--ease); }
@@ -215,16 +226,6 @@ button{ font-family:inherit; cursor:pointer; }
 .divider svg{ width:100%; height:auto; display:block; }
 
 /* ---------- HERO ----------------------------------------------------------- */
-.hero .slides{ position:absolute; inset:0; z-index:0; }
-.hero .slide{
-  position:absolute; inset:0; background-size:cover; background-position:center;
-  opacity:0; transition:opacity 1.6s var(--ease); animation:kenburns 12s ease-in-out infinite alternate;
-}
-.hero .slide.active{ opacity:1; }
-.hero .slides::after{ content:""; position:absolute; inset:0; z-index:1;
-  background:linear-gradient(to bottom, rgba(42,20,24,.35), rgba(74,14,24,.55)); }
-@keyframes kenburns{ from{ transform:scale(1.02);} to{ transform:scale(1.14);} }
-
 .hero-names{
   font-family:var(--script); color:var(--white);
   font-size:clamp(52px,13vw,140px); line-height:.9;
@@ -304,7 +305,12 @@ button{ font-family:inherit; cursor:pointer; }
 .step-val{
   min-width:52px; text-align:center; font-size:30px; color:var(--white);
   font-family:var(--serif);
+  border:0; background:transparent; outline:none; -moz-appearance:textfield;
 }
+/* hide the native number spinner — the themed − / + buttons replace it */
+.step-val::-webkit-inner-spin-button,
+.step-val::-webkit-outer-spin-button{ -webkit-appearance:none; margin:0; }
+.step-val:focus{ outline:none; }
 .step-hint{ font-size:14px; opacity:.7; color:var(--white); }
 
 .rsvp-form input[type=text]{

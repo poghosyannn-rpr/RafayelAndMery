@@ -46,7 +46,7 @@ window.I18N = {
 
     /* RSVP */
     rsvp_title:    "Խնդրում ենք հաստատել Ձեր ներկայությունը",
-    rsvp_deadline: "Սպասում ենք Ձեր պատասխանին մինչև 01.11.2026թ.",
+    rsvp_deadline: "Սպասում ենք Ձեր պատասխանին մինչև 18.09.2026թ.",
     q_attend:      "Կներկա գտնվե՞ք միջոցառմանը",
     opt_yes:       "Այո, հաճույքով",
     opt_no:        "Ցավոք, չեմ կարող",
@@ -103,7 +103,7 @@ window.I18N = {
     info_text2: "You are free with the dress code, but we would love to see you in elegant attire. Please arrive on time so we can enjoy this day together.",
 
     rsvp_title:    "Please confirm your attendance",
-    rsvp_deadline: "We look forward to your reply by 01.11.2026.",
+    rsvp_deadline: "We look forward to your reply by 18.09.2026.",
     q_attend:      "Will you attend the celebration?",
     opt_yes:       "Yes, with pleasure",
     opt_no:        "Unfortunately, I can’t",
@@ -159,7 +159,7 @@ window.I18N = {
     info_text2: "В выборе дресс-кода вы свободны, но нам будет приятно видеть вас в элегантных нарядах. Пожалуйста, приходите вовремя, чтобы вместе насладиться этим днём.",
 
     rsvp_title:    "Пожалуйста, подтвердите ваше присутствие",
-    rsvp_deadline: "Ждём вашего ответа до 01.11.2026.",
+    rsvp_deadline: "Ждём вашего ответа до 18.09.2026.",
     q_attend:      "Придёте ли вы на торжество?",
     opt_yes:       "Да, с удовольствием",
     opt_no:        "К сожалению, не смогу",
