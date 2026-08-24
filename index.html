@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Noto+Serif+Armenian:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=19" />
+  <link rel="stylesheet" href="css/styles.css?v=23" />
 </head>
 <body class="sealed">
 
@@ -56,7 +56,9 @@
     <svg class="ico-play"  viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
     <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
   </button>
-  <audio id="bg-audio" loop preload="auto" src="assets/audio/music.mp3"></audio>
+  <!-- no native "loop" attribute — looping is done in JS so a repeat also
+       restarts at the 26s mark instead of jumping back to 0:00 -->
+  <audio id="bg-audio" preload="auto" src="assets/audio/music.mp3"></audio>
 
   <!-- ===== Envelope intro ===== -->
   <div class="envelope-screen" id="envelope-screen">
@@ -65,7 +67,9 @@
     <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open invitation">
       <span class="open-hint" data-i18n="open_hint"></span>
       <div class="env-body"></div>
-      <div class="env-letter"><img src="assets/img/IMG_2787.JPG" alt="Rafayel & Mery" /></div>
+      <!-- ?v= busts the browser's 24h image cache (see server.js) — bump it
+           whenever this file's content changes, since the filename stays the same -->
+      <div class="env-letter"><img src="assets/img/IMG_2787.JPG?v=3" alt="Rafayel & Mery" /></div>
       <div class="env-flap"></div>
       <div class="seal">R&amp;M</div>
     </div>
@@ -212,7 +216,7 @@
     </footer>
   </main>
 
-  <script src="js/i18n.js?v=19"></script>
-  <script src="js/main.js?v=19"></script>
+  <script src="js/i18n.js?v=23"></script>
+  <script src="js/main.js?v=23"></script>
 </body>
 </html>

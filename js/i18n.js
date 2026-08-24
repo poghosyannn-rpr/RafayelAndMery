@@ -19,7 +19,7 @@ window.I18N = {
 
     /* Invitation message */
     inv_title: "Սիրելի ընկերներ և հարազատներ",
-    inv_text:  "Մեր սիրո ճանապարհը վաղուց է սկսվել, իսկ այս օրը նրա հանդիսավոր հաստատումն է։ Սիրով հրավիրում ենք Ձեզ կիսելու այս հատուկ օրը մեզ հետ։",
+    inv_text:  "Մեր սիրո ճանապարհը սկսվեց երջանիկ պատահականությամբ եւ դարձավ ամբողջ կյանքի որոշում, իսկ այս օրը նրա հանդիսավոր հաստատումն է։ Սիրով հրավիրում ենք Ձեզ կիսելու այս հատուկ օրը մեզ հետ։",
 
     /* Calendar */
     cal_month: "Սեպտեմբեր 2026",
@@ -81,7 +81,7 @@ window.I18N = {
     date:   "25.09.26",
 
     inv_title: "Dear friends and relatives",
-    inv_text:  "Our love story began long ago, and this day is its solemn confirmation. We warmly invite you to share this special day with us.",
+    inv_text:  "Our journey of love began with a happy coincidence and became a decision for a lifetime — and this day is its solemn affirmation. We warmly invite you to share this special day with us.",
 
     cal_month: "September 2026",
     wd_1: "Mon", wd_2: "Tue", wd_3: "Wed", wd_4: "Thu", wd_5: "Fri", wd_6: "Sat", wd_7: "Sun",
@@ -137,7 +137,7 @@ window.I18N = {
     date:   "25.09.26",
 
     inv_title: "Дорогие друзья и родные",
-    inv_text:  "Наш путь любви начался давно, и этот день — его торжественное подтверждение. С любовью приглашаем вас разделить этот особенный день с нами.",
+    inv_text:  "Наш путь любви начался со счастливой случайности и стал решением на всю жизнь, а этот день — его торжественное подтверждение. С любовью приглашаем вас разделить этот особенный день с нами.",
 
     cal_month: "Сентябрь 2026",
     wd_1: "Пн", wd_2: "Вт", wd_3: "Ср", wd_4: "Чт", wd_5: "Пт", wd_6: "Сб", wd_7: "Вс",
