@@ -283,6 +283,21 @@ button{ font-family:inherit; cursor:pointer; }
   transition:background .3s, color .3s;
 }
 .btn-map:hover{ background:var(--gold-lt); color:var(--wine-deep); }
+.prog-cal{
+  margin-top:32px; display:flex; flex-wrap:wrap; gap:16px 22px;
+  justify-content:center; align-items:center;
+}
+.btn-cal{
+  font:inherit; cursor:pointer; display:inline-block; padding:9px 24px; border-radius:999px;
+  border:1px solid var(--gold-lt); color:var(--wine-deep); background:var(--gold-lt);
+  font-size:15px; letter-spacing:.04em; transition:opacity .3s;
+}
+.btn-cal:hover{ opacity:.85; }
+.btn-cal-alt{
+  font-size:14px; color:var(--gold-lt); text-decoration:underline; text-underline-offset:3px;
+  opacity:.85; transition:opacity .3s;
+}
+.btn-cal-alt:hover{ opacity:1; }
 
 /* ---------- COUNTDOWN ------------------------------------------------------ */
 .cd-grid{ display:flex; justify-content:center; gap:clamp(10px,3vw,26px); margin-top:30px; }

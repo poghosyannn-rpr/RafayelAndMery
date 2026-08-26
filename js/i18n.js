@@ -34,6 +34,7 @@ window.I18N = {
     reception_time:  "17:30",
     reception_place: "Palais Wedding Hall",
     how_to_get:      "Ինչպես հասնել",
+    add_to_calendar: "Ավելացնել օրացույցում",
 
     /* Countdown */
     countdown_title: "Մինչ մեր հարսանիքը մնացել է",
@@ -94,6 +95,7 @@ window.I18N = {
     reception_time:  "17:30",
     reception_place: "Palais Wedding Hall",
     how_to_get:      "How to get there",
+    add_to_calendar: "Add to calendar",
 
     countdown_title: "Time left until our wedding",
     cd_days: "Days", cd_hours: "Hours", cd_mins: "Minutes", cd_secs: "Seconds",
@@ -150,6 +152,7 @@ window.I18N = {
     reception_time:  "17:30",
     reception_place: "Palais Wedding Hall",
     how_to_get:      "Как добраться",
+    add_to_calendar: "Добавить в календарь",
 
     countdown_title: "До нашей свадьбы осталось",
     cd_days: "Дней", cd_hours: "Часов", cd_mins: "Минут", cd_secs: "Секунд",

@@ -16,6 +16,12 @@ const MAP_RECEPTION = 'https://yandex.com/maps/-/CTviYLpn';  // Palais Wedding H
 /* Max guests selectable in the RSVP stepper */
 const MAX_PERSONS = 10;
 
+/* "Add to calendar" event span — ceremony start to end of reception.
+   Yerevan has no DST and is UTC+4 year-round, so 14:00–23:00 local
+   converts to a fixed 10:00–19:00 UTC; no timezone library needed. */
+const CAL_START_UTC = new Date('2026-09-25T10:00:00Z'); // 14:00 Yerevan — ceremony
+const CAL_END_UTC   = new Date('2026-09-25T19:00:00Z'); // 23:00 Yerevan — end of reception
+
 /* ----- small helpers ------------------------------------------------------- */
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -202,6 +208,77 @@ $$('.reveal').forEach(el => io.observe(el));
    ========================================================================== */
 $('#map-ceremony')  && ($('#map-ceremony').href  = MAP_CEREMONY);
 $('#map-reception') && ($('#map-reception').href = MAP_RECEPTION);
+
+/* ==========================================================================
+   8b. Add to calendar — downloads an .ics (Apple/Outlook/most Android
+   calendar apps) with a built-in 1-day-before reminder alarm, so the guest's
+   own calendar app notifies them the day before — no server/email needed.
+   A "Google Calendar" link is offered alongside since Google Calendar's web
+   app doesn't reliably import a clicked .ics file.
+   ========================================================================== */
+function icsDate(d) {
+  return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+}
+function icsEscape(s) {
+  return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+}
+/* RFC 5545: content lines over 75 octets must be folded (CRLF + a leading space). */
+function icsFold(line) {
+  if (line.length <= 75) return line;
+  let out = line.slice(0, 75), rest = line.slice(75);
+  while (rest.length > 0) { out += '\r\n ' + rest.slice(0, 74); rest = rest.slice(74); }
+  return out;
+}
+function calEventText() {
+  const dict = window.I18N[currentLang] || window.I18N.am;
+  return {
+    summary: `${dict.name_1} & ${dict.name_2} — ${dict.prog_title}`,
+    description: `${dict.ceremony_title} ${dict.ceremony_time} — ${dict.ceremony_place}\n`
+                + `${dict.reception_title} ${dict.reception_time} — ${dict.reception_place}`,
+    location: dict.reception_place,
+  };
+}
+function buildICS() {
+  const { summary, description, location } = calEventText();
+  const lines = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Rafayel & Mery Wedding//EN', 'CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT',
+    'UID:rafmery-wedding-2026@visitor.local',
+    `DTSTAMP:${icsDate(new Date())}`,
+    `DTSTART:${icsDate(CAL_START_UTC)}`,
+    `DTEND:${icsDate(CAL_END_UTC)}`,
+    `SUMMARY:${icsEscape(summary)}`,
+    `DESCRIPTION:${icsEscape(description)}`,
+    `LOCATION:${icsEscape(location)}`,
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:-P1D', `DESCRIPTION:${icsEscape(summary)}`, 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR',
+  ];
+  return lines.map(icsFold).join('\r\n') + '\r\n';
+}
+function downloadICS() {
+  const blob = new Blob([buildICS()], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'rafayel-mery-wedding.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+function googleCalendarUrl() {
+  const { summary, description, location } = calEventText();
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: summary,
+    dates: `${icsDate(CAL_START_UTC)}/${icsDate(CAL_END_UTC)}`,
+    details: description,
+    location,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+$('#add-to-calendar') && $('#add-to-calendar').addEventListener('click', downloadICS);
+$('#add-to-gcal') && $('#add-to-gcal').addEventListener('click', (e) => {
+  e.preventDefault();
+  window.open(googleCalendarUrl(), '_blank', 'noopener');
+});
 
 /* ==========================================================================
    9. RSVP form -> /api/rsvp (stored in the database)

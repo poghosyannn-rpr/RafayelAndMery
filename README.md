@@ -45,6 +45,24 @@ data/rsvp.db      the database — created automatically (git-ignored)
   (or via env vars: `PORT=9000 ADMIN_KEY=secret node server.js`).
 - **Photos** → drop web images in `assets/img/` and reference them in `index.html`.
 - **Music** → add `assets/audio/music.mp3`; it starts when the envelope is opened.
+- **Event span for "Add to calendar"** → `CAL_START_UTC`/`CAL_END_UTC` at the top of
+  `js/main.js` (currently ceremony 14:00 → end of reception 23:00, Yerevan time,
+  written as fixed UTC since Yerevan has no DST).
+
+## Add to calendar (Programme section)
+
+Two buttons under "How to get there": **Add to calendar** and **Google Calendar**.
+
+- **Add to calendar** downloads a `.ics` file (built client-side, no server call) with
+  a **24-hour-before reminder baked in** (`TRIGGER:-P1D`) — so once a guest adds it to
+  Apple Calendar, Outlook, or most Android calendar apps, *their own calendar app*
+  notifies them the day before. No email/SMS backend needed.
+- **Google Calendar** opens Google's "quick-add" web link pre-filled with the same
+  event. **This path cannot carry the 24h reminder** — Google's `calendar/render` URL
+  has no reminder parameter, so an event added this way only gets whatever default
+  reminder the guest's own Google Calendar is set to. Only the `.ics` download is
+  guaranteed to include the 24h alert (Google Calendar can also import that same
+  `.ics` file directly, with the reminder intact).
 
 ## How RSVPs are stored
 
