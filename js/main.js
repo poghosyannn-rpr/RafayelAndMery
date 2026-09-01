@@ -258,6 +258,19 @@ $$('.reveal').forEach(el => io.observe(el));
 $('#map-ceremony')  && ($('#map-ceremony').href  = MAP_CEREMONY);
 $('#map-reception') && ($('#map-reception').href = MAP_RECEPTION);
 
+/* The groom's/bride's home cards are optional — a couple that doesn't set the
+   map link in js/weddings.js simply doesn't get that card. */
+[
+  ['#card-groom-home', '#map-groom-home', WEDDING.maps.groomHome],
+  ['#card-bride-home', '#map-bride-home', WEDDING.maps.brideHome],
+].forEach(([cardSel, linkSel, url]) => {
+  const card = $(cardSel);
+  if (!card) return;
+  if (!url) { card.hidden = true; return; }
+  const link = $(linkSel);
+  if (link) link.href = url;
+});
+
 /* ==========================================================================
    8b. Add to calendar — downloads an .ics (Apple/Outlook/most Android
    calendar apps) with a built-in 1-day-before reminder alarm, so the guest's

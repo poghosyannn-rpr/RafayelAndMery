@@ -33,6 +33,8 @@ window.WEDDINGS = {
     date:  { iso: '2026-09-25T14:00:00', year: 2026, month: 8, day: 25 },
     cal:   { startUTC: '2026-09-25T10:00:00Z', endUTC: '2026-09-25T19:00:00Z' },
     maps:  {
+      groomHome: 'https://yandex.com/maps/-/CTT0YQpt',   // Groom's home
+      brideHome: 'https://yandex.com/maps/-/CTT0444u',   // Bride's home
       ceremony:  'https://yandex.com/maps/-/CTviUFLt',   // Kecharis
       reception: 'https://yandex.com/maps/-/CTviYLpn',   // Palais Wedding Hall
     },
@@ -46,15 +48,20 @@ window.WEDDINGS = {
       am: {
         name_1: 'Rafayel', name_2: 'Mery', date: '25.09.26',
         cal_month:       'Սեպտեմբեր 2026',
+        groom_home_time: '11:00',
+        bride_home_time: '13:00',
         ceremony_time:   '14:00',
         ceremony_place:  'Կեչառիս վանական համալիր',
         reception_time:  '17:30',
         reception_place: 'Palais Wedding Hall',
         rsvp_deadline:   'Սպասում ենք Ձեր պատասխանին մինչև 18.09.2026թ.',
+
       },
       en: {
         name_1: 'Rafayel', name_2: 'Mery', date: '25.09.26',
         cal_month:       'September 2026',
+        groom_home_time: '11:00',
+        bride_home_time: '13:00',
         ceremony_time:   '14:00',
         ceremony_place:  'Kecharis Monastery',
         reception_time:  '17:30',
@@ -64,6 +71,8 @@ window.WEDDINGS = {
       ru: {
         name_1: 'Рафаел', name_2: 'Мери', date: '25.09.26',
         cal_month:       'Сентябрь 2026',
+        groom_home_time: '11:00',
+        bride_home_time: '13:00',
         ceremony_time:   '14:00',
         ceremony_place:  'Монастырь Кечарис',
         reception_time:  '17:30',
@@ -80,11 +89,11 @@ window.WEDDINGS = {
     date:  { iso: '2026-11-19T14:00:00', year: 2026, month: 11, day: 19 },
     cal:   { startUTC: '2026-11-19T10:00:00Z', endUTC: '2026-11-19T19:00:00Z' },
     maps:  {
+      groomHome: 'https://yandex.com/maps/-/CTT05ZjM',   // Groom's home
+      brideHome: 'https://yandex.com/maps/-/CTT05ZjM',   // Bride's home
       ceremony:  'https://yandex.com/maps/-/CTTUNJ82',   // Hayravanq
       reception: 'https://yandex.com/maps/-/CTviYLpn',   // Palais Hall
     },
-    /* PLACEHOLDER PHOTOS — the rings-on-bouquet macro, no faces in frame.
-       Replace all four paths once Gor & Armine's own photos are added. */
     envelopeImg: '/assets/img/gor/g1.jpg',
     slides: [
       { src: '/assets/img/gor/g1.jpg', position: 'center center' },
@@ -95,6 +104,8 @@ window.WEDDINGS = {
       am: {
         name_1: 'Gor', name_2: 'Armine', date: '19.11.26',
         cal_month:       'Նոյեմբեր 2026',
+        groom_home_time: '11:00',
+        bride_home_time: '13:00',
         ceremony_time:   '14:00',
         ceremony_place:  'Հայրավանք',
         reception_time:  '17:30',
@@ -104,6 +115,8 @@ window.WEDDINGS = {
       en: {
         name_1: 'Gor', name_2: 'Armine', date: '19.11.26',
         cal_month:       'November 2026',
+        groom_home_time: '11:00',
+        bride_home_time: '13:00',
         ceremony_time:   '14:00',
         ceremony_place:  'Hayravank Monastery',
         reception_time:  '17:30',
@@ -113,6 +126,8 @@ window.WEDDINGS = {
       ru: {
         name_1: 'Гор', name_2: 'Армине', date: '19.11.26',
         cal_month:       'Ноябрь 2026',
+        groom_home_time: '11:00',
+        bride_home_time: '13:00',
         ceremony_time:   '14:00',
         ceremony_place:  'Монастырь Айраванк',
         reception_time:  '17:30',

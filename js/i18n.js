@@ -35,6 +35,8 @@ window.I18N = {
 
     /* Programme of the day */
     prog_title:      "Օրվա ծրագիր",
+    groom_home_title: "Փեսայի տուն",
+    bride_home_title: "Հարսի տուն",
     ceremony_title:  "Պսակադրություն",
     ceremony_time:   "14:00",
     ceremony_place:  "Կեչառիս վանական համալիր",
@@ -96,6 +98,8 @@ window.I18N = {
     wd_1: "Mon", wd_2: "Tue", wd_3: "Wed", wd_4: "Thu", wd_5: "Fri", wd_6: "Sat", wd_7: "Sun",
 
     prog_title:      "Programme of the day",
+    groom_home_title: "Groom’s home",
+    bride_home_title: "Bride’s home",
     ceremony_title:  "Wedding ceremony",
     ceremony_time:   "14:00",
     ceremony_place:  "Kecharis Monastery",
@@ -153,6 +157,8 @@ window.I18N = {
     wd_1: "Пн", wd_2: "Вт", wd_3: "Ср", wd_4: "Чт", wd_5: "Пт", wd_6: "Сб", wd_7: "Вс",
 
     prog_title:      "Программа дня",
+    groom_home_title: "Дом жениха",
+    bride_home_title: "Дом невесты",
     ceremony_title:  "Венчание",
     ceremony_time:   "14:00",
     ceremony_place:  "Монастырь Кечарис",

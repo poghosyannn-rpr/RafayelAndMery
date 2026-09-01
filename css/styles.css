@@ -271,6 +271,8 @@ button{ font-family:inherit; cursor:pointer; }
 /* ---------- PROGRAMME ------------------------------------------------------ */
 .prog-grid{ display:grid; grid-template-columns:1fr 1fr; gap:26px; margin-top:34px; }
 .prog-card{ color:var(--white); }
+/* a couple without groom/bride home links gets those cards removed entirely */
+.prog-card[hidden]{ display:none; }
 .prog-ico{ color:var(--gold-lt); margin:0 auto 14px; width:46px; height:46px; }
 .prog-ico svg{ width:100%; height:100%; }
 .prog-card h3{ font-family:var(--script); font-size:clamp(24px,4vw,34px); color:var(--gold-lt); font-weight:400; }

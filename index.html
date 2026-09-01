@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Noto+Serif+Armenian:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/styles.css?v=27" />
+  <link rel="stylesheet" href="/css/styles.css?v=28" />
 </head>
 <body class="sealed">
 
@@ -121,15 +121,30 @@
     <section class="section" id="programme">
       <div class="inner">
         <h2 class="heading on-photo reveal" data-i18n="prog_title"></h2>
+        <!-- Cards run in time order: groom's home -> bride's home -> ceremony ->
+             reception. The two home cards are hidden unless the couple defines
+             maps.groomHome / maps.brideHome in js/weddings.js (main.js does it). -->
         <div class="prog-grid">
-          <div class="prog-card reveal d1">
+          <div class="prog-card reveal d1" id="card-groom-home">
+            <div class="prog-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M10 20v-5h4v5"/></svg></div>
+            <h3 data-i18n="groom_home_title"></h3>
+            <div class="prog-time" data-i18n="groom_home_time"></div>
+            <a class="btn-map" id="map-groom-home" href="#" target="_blank" rel="noopener" data-i18n="how_to_get"></a>
+          </div>
+          <div class="prog-card reveal d2" id="card-bride-home">
+            <div class="prog-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M10 20v-5h4v5"/></svg></div>
+            <h3 data-i18n="bride_home_title"></h3>
+            <div class="prog-time" data-i18n="bride_home_time"></div>
+            <a class="btn-map" id="map-bride-home" href="#" target="_blank" rel="noopener" data-i18n="how_to_get"></a>
+          </div>
+          <div class="prog-card reveal d3">
             <div class="prog-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="15" r="5"/><path d="M9 7l3-4 3 4"/></svg></div>
             <h3 data-i18n="ceremony_title"></h3>
             <div class="prog-time" data-i18n="ceremony_time"></div>
             <p class="prog-place" data-i18n="ceremony_place"></p>
             <a class="btn-map" id="map-ceremony" href="https://maps.google.com" target="_blank" rel="noopener" data-i18n="how_to_get"></a>
           </div>
-          <div class="prog-card reveal d2">
+          <div class="prog-card reveal d4">
             <div class="prog-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M7 3h10l-1 7a4 4 0 01-8 0zM12 14v5M8 21h8"/></svg></div>
             <h3 data-i18n="reception_title"></h3>
             <div class="prog-time" data-i18n="reception_time"></div>
@@ -224,8 +239,8 @@
   </main>
 
   <!-- weddings.js must load first — main.js reads window.WEDDINGS on boot -->
-  <script src="/js/weddings.js?v=1"></script>
-  <script src="/js/i18n.js?v=27"></script>
-  <script src="/js/main.js?v=27"></script>
+  <script src="/js/weddings.js?v=2"></script>
+  <script src="/js/i18n.js?v=28"></script>
+  <script src="/js/main.js?v=28"></script>
 </body>
 </html>
