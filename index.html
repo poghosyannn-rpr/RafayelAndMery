@@ -8,15 +8,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Noto+Serif+Armenian:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=26" />
+  <link rel="stylesheet" href="/css/styles.css?v=27" />
 </head>
 <body class="sealed">
 
   <!-- ===== Fixed page background — 3-image slideshow. Content scrolls over it. ===== -->
+  <!-- The images come from js/weddings.js (per couple) — main.js fills them in. -->
   <div class="page-bg" id="page-bg" aria-hidden="true">
-    <div class="pbg-slide active" style="background-image:url('assets/img/2026-07-26 14.02.17.jpg'); background-position:center center;"></div>
-    <div class="pbg-slide" style="background-image:url('assets/img/IMG_1198.JPG'); background-position:center 15%;"></div>
-    <div class="pbg-slide" style="background-image:url('assets/img/IMG_1994.jpg'); background-position:center center;"></div>
+    <div class="pbg-slide active"></div>
+    <div class="pbg-slide"></div>
+    <div class="pbg-slide"></div>
   </div>
   <div class="page-bg-overlay" aria-hidden="true"></div>
 
@@ -58,7 +59,7 @@
   </button>
   <!-- no native "loop" attribute — looping is done in JS so a repeat also
        restarts at the 26s mark instead of jumping back to 0:00 -->
-  <audio id="bg-audio" preload="auto" src="assets/audio/music.mp3"></audio>
+  <audio id="bg-audio" preload="auto" src="/assets/audio/music.mp3"></audio>
 
   <!-- ===== Envelope intro ===== -->
   <div class="envelope-screen" id="envelope-screen">
@@ -67,11 +68,13 @@
     <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open invitation">
       <span class="open-hint" data-i18n="open_hint"></span>
       <div class="env-body"></div>
-      <!-- ?v= busts the browser's 24h image cache (see server.js) — bump it
-           whenever this file's content changes, since the filename stays the same -->
-      <div class="env-letter"><img src="assets/img/IMG_2787.JPG?v=5" alt="Rafayel & Mery" /></div>
+      <!-- photo src/alt and the seal initials come from the couple's entry in
+           js/weddings.js — main.js fills them in. The ?v= on the image path there
+           busts the browser's 24h image cache (see server.js): bump it whenever a
+           photo's content changes but its filename stays the same. -->
+      <div class="env-letter"><img id="env-photo" alt="" /></div>
       <div class="env-flap"></div>
-      <div class="seal">R&amp;M</div>
+      <div class="seal" id="env-seal"></div>
     </div>
 
     <p class="env-note" data-i18n="envelope_note"></p>
@@ -220,7 +223,9 @@
     </footer>
   </main>
 
-  <script src="js/i18n.js?v=26"></script>
-  <script src="js/main.js?v=26"></script>
+  <!-- weddings.js must load first — main.js reads window.WEDDINGS on boot -->
+  <script src="/js/weddings.js?v=1"></script>
+  <script src="/js/i18n.js?v=27"></script>
+  <script src="/js/main.js?v=27"></script>
 </body>
 </html>

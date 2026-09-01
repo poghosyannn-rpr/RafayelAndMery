@@ -2,16 +2,35 @@
    Rafayel & Mery — wedding invitation logic
    ========================================================================== */
 
-/* ----- CONFIG (edit these) ------------------------------------------------- */
-/* Wedding date/time — 25 Sep 2026, 14:00 (used by the countdown + calendar) */
-const WEDDING_DATE  = new Date('2026-09-25T14:00:00');
-const WEDDING_YEAR  = 2026;
-const WEDDING_MONTH = 8;   // 0-based: 8 = September
-const WEDDING_DAY   = 25;
+/* ----- CONFIG -------------------------------------------------------------
+   Per-couple content (names, date, venues, photos) lives in js/weddings.js —
+   edit it there, not here. This file only picks the right entry and wires it up.
+   --------------------------------------------------------------------------- */
+
+/* Which couple's invitation is this? /u/<username> selects one; "/" is the
+   default. Same regex the RSVP submit uses to route the response (section 9). */
+const WEDDING_SLUG = (location.pathname.match(/^\/u\/([a-z0-9-]+)\/?$/i) || [])[1];
+const WEDDING = (function pickWedding() {
+  const all = window.WEDDINGS || {};
+  const found = all[(WEDDING_SLUG || '').toLowerCase()] || all[window.WEDDING_DEFAULT];
+  if (found) return found;
+  /* An account can exist without a weddings.js entry (or the file failed to
+     load). Don't let that throw and take the whole page down — say so loudly
+     and fall back to something renderable. */
+  console.error('[weddings] no entry for "' + (WEDDING_SLUG || window.WEDDING_DEFAULT)
+              + '" — add one to js/weddings.js');
+  return { date: {}, cal: {}, maps: {}, slides: [] };
+})();
+
+/* Wedding date/time — used by the countdown + the calendar grid */
+const WEDDING_DATE  = new Date(WEDDING.date.iso);
+const WEDDING_YEAR  = WEDDING.date.year;
+const WEDDING_MONTH = WEDDING.date.month;   // 0-based: 8 = September
+const WEDDING_DAY   = WEDDING.date.day;
 
 /* Map links for the two "How to get there" buttons */
-const MAP_CEREMONY  = 'https://yandex.com/maps/-/CTviUFLt';  // Kecharis
-const MAP_RECEPTION = 'https://yandex.com/maps/-/CTviYLpn';  // Palais Wedding Hall
+const MAP_CEREMONY  = WEDDING.maps.ceremony;
+const MAP_RECEPTION = WEDDING.maps.reception;
 
 /* Max guests selectable in the RSVP stepper */
 const MAX_PERSONS = 10;
@@ -19,12 +38,31 @@ const MAX_PERSONS = 10;
 /* "Add to calendar" event span — ceremony start to end of reception.
    Yerevan has no DST and is UTC+4 year-round, so 14:00–23:00 local
    converts to a fixed 10:00–19:00 UTC; no timezone library needed. */
-const CAL_START_UTC = new Date('2026-09-25T10:00:00Z'); // 14:00 Yerevan — ceremony
-const CAL_END_UTC   = new Date('2026-09-25T19:00:00Z'); // 23:00 Yerevan — end of reception
+const CAL_START_UTC = new Date(WEDDING.cal.startUTC);
+const CAL_END_UTC   = new Date(WEDDING.cal.endUTC);
 
 /* ----- small helpers ------------------------------------------------------- */
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+/* ----- apply the couple's photos, seal and page title ---------------------- */
+(function applyWeddingContent() {
+  if (WEDDING.title) document.title = WEDDING.title;
+
+  const seal = $('#env-seal');
+  if (seal && WEDDING.seal) seal.textContent = WEDDING.seal;
+
+  const photo = $('#env-photo');
+  if (photo && WEDDING.envelopeImg) photo.src = WEDDING.envelopeImg;
+
+  // slides are positional: slot i takes WEDDING.slides[i]
+  $$('.pbg-slide').forEach((el, i) => {
+    const slide = (WEDDING.slides || [])[i];
+    if (!slide) return;
+    el.style.backgroundImage    = `url('${slide.src}')`;
+    el.style.backgroundPosition = slide.position || 'center center';
+  });
+})();
 
 /* ==========================================================================
    1. i18n
@@ -37,9 +75,17 @@ const langStore = {
 
 let currentLang = langStore.get() || 'am';
 
+/* The shared strings from js/i18n.js with this couple's own strings (names,
+   date, venues...) laid over the top. Anything a couple doesn't specify falls
+   back to js/i18n.js. Always read texts through this, never window.I18N direct. */
+function dictFor(lang) {
+  const base = window.I18N[lang] || window.I18N.am;
+  return { ...base, ...((WEDDING.i18n || {})[lang] || {}) };
+}
+
 function applyLang(lang) {
-  const dict = window.I18N[lang];
-  if (!dict) return;
+  if (!window.I18N[lang]) return;
+  const dict = dictFor(lang);
   currentLang = lang;
   langStore.set(lang);
   document.documentElement.lang = dict.lang_html || lang;
@@ -52,6 +98,9 @@ function applyLang(lang) {
   // placeholder for the name input
   const nameInput = $('#guest-name');
   if (nameInput) nameInput.placeholder = dict.name_ph || '';
+  // envelope photo alt — the couple's names in the current language
+  const photo = $('#env-photo');
+  if (photo) photo.alt = [dict.name_1, dict.name_2].filter(Boolean).join(' & ');
 
   // active flag state
   $$('.lang button').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
@@ -230,7 +279,7 @@ function icsFold(line) {
   return out;
 }
 function calEventText() {
-  const dict = window.I18N[currentLang] || window.I18N.am;
+  const dict = dictFor(currentLang);
   return {
     summary: `${dict.name_1} & ${dict.name_2} — ${dict.prog_title}`,
     description: `${dict.ceremony_title} ${dict.ceremony_time} — ${dict.ceremony_place}\n`
@@ -329,7 +378,7 @@ setPersons(1);
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const dict = window.I18N[currentLang];
+  const dict = dictFor(currentLang);
 
   const attendance = form.querySelector('input[name="attendance"]:checked');
   const name = $('#guest-name').value.trim();

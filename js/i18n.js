@@ -1,6 +1,14 @@
 /* ==========================================================================
-   Translations — edit any text here. Three languages: am / en / ru.
+   Translations — edit any SHARED text here. Three languages: am / en / ru.
    Any element in index.html with data-i18n="key" gets its text from here.
+
+   !! COUPLE-SPECIFIC KEYS LIVE IN js/weddings.js, NOT HERE !!
+   name_1, name_2, date, cal_month, ceremony_time, ceremony_place,
+   reception_time, reception_place and rsvp_deadline are overridden per couple
+   by their entry in js/weddings.js — editing them below will NOT change what
+   any invitation shows. The values here are only the fallback for a couple who
+   omits a key. Everything else (form labels, weekday names, countdown labels,
+   info text, footer) is genuinely shared and IS edited here.
    ========================================================================== */
 window.I18N = {
   am: {
