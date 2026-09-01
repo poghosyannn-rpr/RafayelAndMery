@@ -85,11 +85,11 @@ window.WEDDINGS = {
     },
     /* PLACEHOLDER PHOTOS — the rings-on-bouquet macro, no faces in frame.
        Replace all four paths once Gor & Armine's own photos are added. */
-    envelopeImg: '/assets/img/2026-07-26 14.02.17.jpg',
+    envelopeImg: '/assets/img/gor/g1.jpg',
     slides: [
-      { src: '/assets/img/2026-07-26 14.02.17.jpg', position: 'center center' },
-      { src: '/assets/img/2026-07-26 14.02.17.jpg', position: 'center center' },
-      { src: '/assets/img/2026-07-26 14.02.17.jpg', position: 'center center' },
+      { src: '/assets/img/gor/g1.jpg', position: 'center center' },
+      { src: '/assets/img/gor/g2.jpg', position: 'center center' },
+      { src: '/assets/img/gor/g3.jpg', position: 'center center' },
     ],
     i18n: {
       am: {
@@ -129,8 +129,8 @@ window.WEDDINGS = {
     date:  { iso: '2026-10-16T14:00:00', year: 2026, month: 10, day: 16 },
     cal:   { startUTC: '2026-11-19T10:00:00Z', endUTC: '2026-10-16T19:00:00Z' },
     maps:  {
-      ceremony:  'https://yandex.com/maps/-/CTTUNJ82',   // Hayravanq
-      reception: 'https://yandex.com/maps/-/CTviYLpn',   // Palais Hall
+      ceremony:  'https://yandex.com/maps/-/CTviUFLt',   // Kecharis
+      reception: 'https://yandex.com/maps/-/CTTWzF41',   // Adana Complex
     },
     /* PLACEHOLDER PHOTOS — the rings-on-bouquet macro, no faces in frame.
        Replace all four paths once Gor & Armine's own photos are added. */
@@ -145,27 +145,27 @@ window.WEDDINGS = {
         name_1: 'Gor', name_2: '', date: '16.10.26',
         cal_month:       'հոկտեմբեր 2026',
         ceremony_time:   '14:00',
-        ceremony_place:  'Հայրավանք',
+        ceremony_place:  'Կեչառիս վանական համալիր',
         reception_time:  '17:30',
-        reception_place: 'Palais Hall',
+        reception_place: 'Adana complex',
         rsvp_deadline:   'Սպասում ենք Ձեր պատասխանին մինչև 06.10.2026թ.',
       },
       en: {
-        name_1: 'Gor', name_2: 'Armine', date: '16.10.26',
+        name_1: 'Gor', name_2: '', date: '16.10.26',
         cal_month:       'October 2026',
         ceremony_time:   '14:00',
-        ceremony_place:  'Hayravank Monastery',
+        ceremony_place:  'Kecharis Monastery',
         reception_time:  '17:30',
-        reception_place: 'Palais Hall',
+        reception_place: 'Adana complex',
         rsvp_deadline:   'We look forward to your reply by 06.10.2026.',
       },
       ru: {
-        name_1: 'Гор', name_2: '', date: '19.11.26',
+        name_1: 'Гор', name_2: '', date: '16.10.26',
         cal_month:       'Октябрь 2026',
         ceremony_time:   '14:00',
-        ceremony_place:  'Монастырь Айраванк',
+        ceremony_place:  'Монастырь Кечарис',
         reception_time:  '17:30',
-        reception_place: 'Palais Hall',
+        reception_place: 'Adana complex',
         rsvp_deadline:   'Ждём вашего ответа до 06.10.2026.',
       },
     },
