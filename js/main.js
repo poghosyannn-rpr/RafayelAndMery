@@ -174,13 +174,10 @@ envelope.addEventListener('keydown', e => {
    ========================================================================== */
 const audio = $('#bg-audio');
 const musicBtn = $('#music-btn');
-const MUSIC_START = 26;   // seconds — every start (first play, resume, loop
-                          // repeat) cuts in here instead of at 0:00
 let musicWanted = true;
 
 function tryPlayMusic() {
   if (!musicWanted) return;
-  audio.currentTime = MUSIC_START;
   audio.play().then(() => {
     musicBtn.classList.add('playing');
   }).catch(() => { /* autoplay blocked — will retry on the next user gesture */ });
@@ -202,10 +199,6 @@ musicBtn.addEventListener('click', () => {
     musicBtn.classList.remove('playing');
   }
 });
-
-// Manual loop (no native "loop" attribute on the <audio>): when the track
-// finishes, jump back to MUSIC_START rather than 0:00 and keep playing.
-audio.addEventListener('ended', () => { if (musicWanted) tryPlayMusic(); });
 
 /* ==========================================================================
    5. Scroll reveal
