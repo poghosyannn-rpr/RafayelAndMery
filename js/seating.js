@@ -203,6 +203,42 @@
     return chip;
   }
 
+  /* ---------- auto-scroll while dragging -----------------------------------
+     The floor is 2600×1800 but only ~14% of it fits on screen, so most tables
+     sit outside the viewport. Without this you simply cannot drop a guest on a
+     table you can't currently see — the drag ends wherever the pointer is.
+     While a drag is live, holding the pointer near an edge of .floor-wrap
+     scrolls the floor in that direction, so every table is reachable. */
+  const EDGE = 60;        // px from the edge where scrolling kicks in
+  const EDGE_MAX = 22;    // px per frame at the very edge
+  let autoScroll = null;  // { x, y } speed, or null when idle
+  let autoRAF = 0;
+
+  function autoScrollStep() {
+    if (!autoScroll) { autoRAF = 0; return; }
+    floorWrap.scrollLeft += autoScroll.x;
+    floorWrap.scrollTop  += autoScroll.y;
+    autoRAF = requestAnimationFrame(autoScrollStep);
+  }
+
+  /* Speed ramps up the closer the pointer gets to the edge. */
+  function updateAutoScroll(e) {
+    const r = floorWrap.getBoundingClientRect();
+    const speed = (dist) => dist >= EDGE ? 0 : Math.ceil((1 - dist / EDGE) * EDGE_MAX);
+    let x = 0, y = 0;
+    if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+      x = speed(e.clientX - r.left) ? -speed(e.clientX - r.left) : speed(r.right - e.clientX);
+      y = speed(e.clientY - r.top)  ? -speed(e.clientY - r.top)  : speed(r.bottom - e.clientY);
+    }
+    autoScroll = (x || y) ? { x, y } : null;
+    if (autoScroll && !autoRAF) autoRAF = requestAnimationFrame(autoScrollStep);
+  }
+
+  function stopAutoScroll() {
+    autoScroll = null;
+    if (autoRAF) { cancelAnimationFrame(autoRAF); autoRAF = 0; }
+  }
+
   /* ---------- dragging a guest -------------------------------------------- */
   let drag = null;
 
@@ -241,6 +277,7 @@
     if (!drag) return;
     drag.moved = true;
     moveGhost(e);
+    updateAutoScroll(e);   // near an edge? pan the floor so off-screen tables are reachable
 
     drag.ghost.style.visibility = 'hidden';
     const under = document.elementFromPoint(e.clientX, e.clientY);
@@ -259,6 +296,7 @@
 
   async function onGuestUp() {
     window.removeEventListener('pointermove', onGuestMove);
+    stopAutoScroll();
     if (!drag) return;
     const { guest, ghost, src, target, moved } = drag;
 
@@ -321,25 +359,41 @@
     e.preventDefault();
 
     const startX = e.clientX, startY = e.clientY;
+    // auto-scrolling pans the floor under the pointer, so the table has to
+    // follow that scroll as well as the pointer or it lags behind the cursor
+    const startScrollL = floorWrap.scrollLeft, startScrollT = floorWrap.scrollTop;
     const origX = t.x, origY = t.y;
     let x = origX, y = origY, moved = false;
 
     el.classList.add('moving');
 
     const size = sizeOf(t);
-    function onMove(ev) {
-      moved = true;
+    function place(ev) {
       // screen pixels -> floor coordinates (the floor is scaled by `zoom`)
-      const dx = (ev.clientX - startX) / zoom;
-      const dy = (ev.clientY - startY) / zoom;
+      const dx = (ev.clientX - startX + (floorWrap.scrollLeft - startScrollL)) / zoom;
+      const dy = (ev.clientY - startY + (floorWrap.scrollTop  - startScrollT)) / zoom;
       x = Math.max(0, Math.min(origX + dx, FLOOR_W - size.w));
       y = Math.max(0, Math.min(origY + dy, FLOOR_H - size.h));
       el.style.left = x + 'px';
       el.style.top  = y + 'px';
     }
 
+    let lastEv = e;
+    function onMove(ev) {
+      moved = true;
+      lastEv = ev;
+      updateAutoScroll(ev);   // pan when the table is dragged toward an edge
+      place(ev);
+    }
+    // while the floor auto-scrolls the pointer may be still, so keep the table
+    // tracking the scroll as it happens
+    floorWrap.addEventListener('scroll', onFloorScroll);
+    function onFloorScroll() { if (moved) place(lastEv); }
+
     async function onUp() {
       window.removeEventListener('pointermove', onMove);
+      floorWrap.removeEventListener('scroll', onFloorScroll);
+      stopAutoScroll();
       el.classList.remove('moving');
       if (!moved) return;
       t.x = x; t.y = y;
