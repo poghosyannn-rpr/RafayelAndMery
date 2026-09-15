@@ -300,7 +300,10 @@ body.tab-seating .dash{ max-width:none; padding-left:16px; padding-right:16px; }
 
 .floor-wrap{
   overflow:auto; border-radius:16px;
-  height:calc(100vh - 200px); min-height:460px;
+  /* Tall enough for two rows of tables without scrolling: new tables cascade
+     4 per row and the second row sits at y 340–540 (see POST /api/tables in
+     server.js), so anything under ~600px clipped it. */
+  height:calc(100vh - 170px); min-height:620px;
   /* faint grid so the floor reads as a plan and the tables stand out on it */
   background:
     linear-gradient(rgba(227,205,158,.06) 1px, transparent 1px) 0 0 / 40px 40px,
