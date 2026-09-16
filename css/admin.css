@@ -296,6 +296,28 @@ tr.row-dragging{
 /* The seating tab gets the whole window — the floor plan is the point of it. */
 body.tab-seating .dash{ max-width:none; padding-left:16px; padding-right:16px; }
 
+/* The seating tab fills the viewport exactly, so .floor-wrap is the ONLY thing
+   that scrolls. While the page itself could also scroll, dragging a table
+   toward the bottom scrolled the page out from under the pointer instead of
+   panning the floor, and the floor's lower edge was never reachable. Sizing by
+   flex (not a 100vh calc) also means the floor always takes whatever height is
+   actually left over, on any window. */
+body.tab-seating{ overflow:hidden; }
+body.tab-seating .dash{
+  height:100vh; box-sizing:border-box;
+  padding-top:14px; padding-bottom:14px;
+  display:flex; flex-direction:column;
+}
+/* Tighter chrome on this tab only — every px saved above goes to the floor,
+   which needs ~540px to show two rows of tables without scrolling. */
+body.tab-seating .dash-head{ margin-bottom:12px; }
+body.tab-seating .tabs{ margin-bottom:12px; }
+body.tab-seating .seat-toolbar{ margin-bottom:10px; }
+body.tab-seating #panel-seating{ flex:1; min-height:0; display:flex; flex-direction:column; }
+body.tab-seating .seat-layout{ flex:1; min-height:0; }
+body.tab-seating .floor-wrap,
+body.tab-seating .seat-panel{ height:100%; min-height:0; }
+
 .seat-layout{ display:grid; grid-template-columns:1fr 300px; gap:18px; align-items:start; }
 
 .floor-wrap{
@@ -314,9 +336,9 @@ body.tab-seating .dash{ max-width:none; padding-left:16px; padding-right:16px; }
 /* The canvas is sized floor×zoom so the scrollbars match what you see, while
    .floor keeps its own 1600×1100 coordinate space (table x/y stay meaningful). */
 /* bigger working area — pair with FLOOR_W/FLOOR_H in js/seating.js */
-.floor-canvas{ position:relative; width:2600px; height:1800px; }
+.floor-canvas{ position:relative; width:2600px; height:3600px; }
 .floor{
-  position:relative; width:2600px; height:1800px;
+  position:relative; width:2600px; height:3600px;
   transform-origin:0 0; will-change:transform;
 }
 .floor-empty{ position:absolute; inset:0; display:grid; place-items:center; opacity:.7; font-size:17px; }

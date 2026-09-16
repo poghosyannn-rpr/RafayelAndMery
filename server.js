@@ -986,11 +986,15 @@ const server = http.createServer(async (req, res) => {
           ? Math.floor(+b.number) : qNextTableNo.get(uid).n;
         const capacity = Number.isFinite(+b.capacity) && +b.capacity > 0
           ? Math.min(Math.floor(+b.capacity), 30) : DEFAULT_CAPACITY;
-        // stagger new tables so they don't stack on top of each other
+        /* Stagger new tables so they don't stack. 5 per row with a small shift
+           keeps the first 10 inside a ~1320×480 block, which fits one screen
+           once the floor auto-fits its zoom (see fitToTables in js/seating.js).
+           A 200px table's name chips sit on its rim, so the 270/240 steps leave
+           just enough room for them not to collide with the next table. */
         const shape = b.shape === 'rect' ? 'rect' : 'circle';
         const i = qTableCount.get(uid).n;
-        const x = Number.isFinite(+b.x) ? +b.x : 60 + (i % 4) * 340;
-        const y = Number.isFinite(+b.y) ? +b.y : 60 + Math.floor(i / 4) * 280;
+        const x = Number.isFinite(+b.x) ? +b.x : 40 + (i % 5) * 270;
+        const y = Number.isFinite(+b.y) ? +b.y : 40 + Math.floor(i / 5) * 240;
         const info = insertTable.run(number, x, y, capacity, new Date().toISOString(), shape, uid);
         return sendJson(res, 200, { ok: true, id: Number(info.lastInsertRowid), number, shape });
       }

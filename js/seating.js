@@ -34,7 +34,10 @@
   /* ---------- zoom ---------------------------------------------------------- */
   const canvas   = $('#floor-canvas');
   const floorWrap= $('#floor-wrap');
-  const FLOOR_W = 2600, FLOOR_H = 1800;   // keep in step with .floor in admin.css
+  // Floor coordinate space. Height fits 15 tables stacked vertically
+  // (40 start + 14 × 240 step + 200 table = 3600). Keep in step with
+  // .floor / .floor-canvas in admin.css, and with the y clamp in table drags.
+  const FLOOR_W = 2600, FLOOR_H = 3600;
   const ZOOM_MIN = 0.3, ZOOM_MAX = 2, ZOOM_STEP = 0.1;
 
   let zoom = 1;
@@ -78,7 +81,8 @@
   $('#zoom-level')?.addEventListener('click', () => setZoom(1));
 
   /* Fit: scale so every table is visible at once. */
-  $('#zoom-fit')?.addEventListener('click', () => {
+  /* Zoom out just far enough that every table is on screen at once. */
+  function fitToTables() {
     const tables = window.Admin?.state.tables || [];
     if (!tables.length) { setZoom(1); return; }
     const maxX = Math.max(...tables.map(t => t.x + sizeOf(t).w)) + 40;
@@ -86,7 +90,25 @@
     const z = Math.min(floorWrap.clientWidth / maxX, floorWrap.clientHeight / maxY, ZOOM_MAX);
     setZoom(Math.max(z, ZOOM_MIN));
     floorWrap.scrollLeft = floorWrap.scrollTop = 0;
-  });
+  }
+
+  $('#zoom-fit')?.addEventListener('click', fitToTables);
+
+  /* Show the whole plan the first time the tab is opened, so a full set of
+     tables lands on one screen instead of mostly off the right edge. Only
+     once per page load — after that the zoom is the user's to control. */
+  let didAutoFit = false;
+  function autoFitOnce() {
+    if (didAutoFit) return;
+    const tables = window.Admin?.state.tables || [];
+    if (!tables.length || !floorWrap.clientWidth) return;   // tab not visible yet
+    didAutoFit = true;
+    const maxX = Math.max(...tables.map(t => t.x + sizeOf(t).w)) + 40;
+    const maxY = Math.max(...tables.map(t => t.y + sizeOf(t).h)) + 40;
+    // already all visible at the current zoom? leave the user's zoom alone
+    if (maxX * zoom <= floorWrap.clientWidth && maxY * zoom <= floorWrap.clientHeight) return;
+    fitToTables();
+  }
 
   /* Ctrl/⌘ + wheel zooms around the cursor. */
   floorWrap?.addEventListener('wheel', e => {
@@ -186,6 +208,8 @@
     const totalUnseated = guests.filter(g => g.table_id == null).length;
     $('#seat-counts').textContent =
       `${totalUnseated} unseated · ${guests.length} total`;
+
+    autoFitOnce();   // first paint with tables: zoom so the whole plan is on one screen
   }
 
   function makeChip(g) {
