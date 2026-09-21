@@ -87,7 +87,7 @@ db.exec(`
     number      INTEGER NOT NULL,
     x           REAL    NOT NULL DEFAULT 60,
     y           REAL    NOT NULL DEFAULT 60,
-    capacity    INTEGER NOT NULL DEFAULT 12,
+    capacity    INTEGER NOT NULL DEFAULT 13,
     created_at  TEXT    NOT NULL
   );
 
