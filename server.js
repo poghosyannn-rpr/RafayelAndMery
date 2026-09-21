@@ -27,7 +27,7 @@ const ADMIN_KEY = process.env.ADMIN_KEY || crypto.randomBytes(9).toString('base6
 // otherwise the database is wiped on every redeploy.
 const DB_PATH   = process.env.DB_PATH || path.join(__dirname, 'data', 'rsvp.db');
 const MAX_PERSONS = 10;
-const DEFAULT_CAPACITY = 12;   // seats per round table
+const DEFAULT_CAPACITY = 13;   // seats per round table
 const MAX_MANUAL_GUESTS = 20;  // most people one manual "add" can create at once
 const OWNER_USERNAME = (process.env.OWNER_USERNAME || 'rafmery').toLowerCase();
 const OWNER_DISPLAY  = process.env.OWNER_DISPLAY  || 'Rafayel & Mery';
